@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-05-2021 a las 03:03:43
+-- Tiempo de generación: 17-05-2021 a las 07:02:31
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -196,10 +196,7 @@ CREATE TABLE `inventario` (
 --
 
 INSERT INTO `inventario` (`codigo`, `nombre`, `descripcion`, `stock`, `categoria`, `precioCompra`, `precioVenta`) VALUES
-(1, '', 'Kit brocas', 5, 5, 49.99, 99.99),
-(8, 'Aire comprimido', 'Test', 4, 1, 49.99, 74.99),
-(11, '', 'Kit brocas', 5, 1, 49.99, 99.99),
-(14, 'Aire comprimido', 'Para sadasdaslimpiar teclados', 4, 1, 49.99, 74.99);
+(14, 'Aire comprimido', 'Teclado ', 4, 1, 49.99, 74.99);
 
 -- --------------------------------------------------------
 
@@ -250,6 +247,14 @@ CREATE TABLE `pedidos` (
   `surtido` tinyint(4) NOT NULL,
   `sucursal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `pedidos`
+--
+
+INSERT INTO `pedidos` (`pedido`, `cantidad`, `refaccion`, `marca`, `modelo`, `costoTotal`, `concepto`, `dia`, `mes`, `yearTime`, `surtido`, `sucursal`) VALUES
+(3, 10, 'Bateriaaaaaaa', 'Samsumg', 'Galaxy', 0, NULL, 16, 5, 2021, 0, 1),
+(6, 1, 'Batea', 'Xiaomi', 'Redmi a2 lite', 0, NULL, 16, 5, 2021, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -531,7 +536,7 @@ ALTER TABLE `movimientos`
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `servicios`
