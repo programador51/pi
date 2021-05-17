@@ -74,6 +74,9 @@ export async function fetchInventory() {
 
 export async function executeDeleteProduct(idProduct) {
     try {
+
+        document.getElementById('optionsInventory').classList.add('d-none');
+
         const { data } = await axios.post(`${URL_API}inventario/borrar/producto`, {
             idProduct
         });
@@ -150,6 +153,7 @@ export async function addProduct() {
         });
 
         if(data.status==200){
+            querySuccess(data.message);
             return true;
         }
         
@@ -218,10 +222,116 @@ export async function login(e){
 }
 
 // REFACTIONS
-/* export async function getRefactionsDay(){
+export async function addRefaction(){
     try {
-        const { data } = axios.get()
+
+        const quantity = document.getElementById('quantity').value;
+        const refaction = document.getElementById('refaction').value;
+        const fabricant = document.getElementById('fabricant').value;
+        const model = document.getElementById('model').value;
+
+        const today = getActualDate();
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+        const { data } = await axios.post(`${URL_API}refacciones/agregar`,{
+            quantity,
+            refaction,
+            fabricant,
+            model,
+            day:today.numberDate.day,
+            month:today.numberDate.month+1,
+            year:today.numberDate.year,
+            rol:userInfo.rol,
+            sucursal:userInfo.sucursal
+        }
+            
+        );
+
+        console.log(data);
+
+        if(data.status===200){
+            querySuccess(data.message);
+            document.getElementById('closeAddProduct').click();
+            document.getElementById('addProductForm').reset();
+            return true;
+        }
+
+        queryError(data.message);
+
     } catch (error) {
         console.log(error);
     }
-} */
+}
+
+export async function getRefactions(){
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const today = getActualDate();
+
+    try {
+        // refacciones/sucursal/dia/mes/año
+        const { data } = await axios.get(`${URL_API}refacciones/${userInfo.sucursal}/${today.numberDate.day}/${today.numberDate.month+1}/${today.numberDate.year}`);
+
+        if(data.status===200){
+            console.log('Refactions obtained');
+            return data.refactions;
+        }
+        
+        queryError(data.error);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function executeDeleteRefaction(id){
+    try {
+
+        document.getElementById('optionsRefactions').classList.add('d-none');
+
+
+        const { data } = await axios.post(`${URL_API}refacciones/borrar`,{
+            id
+        });
+
+        if(data.status===200){
+            querySuccess(data.message);
+            document.getElementById(id).innerHTML = ``;
+            return;
+        }
+
+        queryError(data.error);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function editRefaction(id){
+    try {
+        const quantity = document.getElementById('editQuantity').value;
+        const refaction = document.getElementById('editRefaction').value;
+        const fabricant = document.getElementById('editFabricant').value;
+        const model = document.getElementById('editModel').value;
+        
+
+        document.getElementById('closeAddProduct').click();
+        document.getElementById('optionsRefactions').classList.add('d-none');
+
+        const { data } = await axios.post(`${URL_API}refacciones/editar`,{
+            quantity,
+            refaction,
+            fabricant,
+            model,
+            id
+        });
+
+        if(data.status===200){
+            querySuccess(data.message);
+            return true;
+        }
+
+        return false;
+
+    } catch (error) {
+        console.log(error);
+    }
+}

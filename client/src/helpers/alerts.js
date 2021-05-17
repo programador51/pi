@@ -1,5 +1,5 @@
 import sa2 from 'sweetalert2';
-import {executeDeleteProduct} from './apis';
+import {executeDeleteProduct,executeDeleteRefaction} from './apis';
 
 export function deleteSuccess(message, idRow) {
     sa2.fire({
@@ -48,6 +48,21 @@ export function deleteProduct(message,id){
     .then(result=>{
         if(result.isConfirmed){
             executeDeleteProduct(id);
+        }
+    });
+}
+
+export function deleteRefaction(message,id){
+    sa2.fire({
+        title:message,
+        icon:'warning',
+        showCancelButton:true,
+        cancelButtonText:'No',
+        confirmButtonText:'Si'
+    })
+    .then(result=>{
+        if(result.isConfirmed){
+            executeDeleteRefaction(id);
         }
     });
 }

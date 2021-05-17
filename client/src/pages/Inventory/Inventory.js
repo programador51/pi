@@ -12,6 +12,8 @@ import ModalAddCategory from './ModalAddCategory';
 
 export default function Inventory() {
 
+    document.title = `Inventario`;
+
     const {selectedRow,infoRow,reload} = useContext(UtilitiesContext);
 
     const [isFetching,setIsFetching] = useState(true);

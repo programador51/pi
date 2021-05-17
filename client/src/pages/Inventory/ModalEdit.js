@@ -13,6 +13,7 @@ export default function ModalEdit({idModal,categorys}){
         if(resultUpdate){
             querySuccess(`Producto actualizado correctamente!`);
             document.getElementById('closeEditProduct').click();
+            document.getElementById('optionsInventory').classList.add('d-none');
             setReload(!reload);
         }
     }

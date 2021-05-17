@@ -1,14 +1,16 @@
 import React, { useContext } from 'react';
-import {InlineInput, SelectInput} from '../../components/individual/Inputs';
-import {addRefaction} from '../../helpers/apis';
+import {InlineInput} from '../../components/individual/Inputs';
+import {editRefaction} from '../../helpers/apis';
 import UtilitiesContext from '../../context/View/ViewContext';
 
-export default function ModalAdd({idModal}){
+export default function ModalEdit({idModal}){
 
-    const { reload,setReload } = useContext(UtilitiesContext);
+    const { reload,setReload,selectedRow } = useContext(UtilitiesContext);
 
-    const triggerAdd = async() =>{
-        const result = await addRefaction();
+    const triggerEdit = async() => {
+        const result = await editRefaction(selectedRow);
+        document.getElementById('closeEditRefaction').click();
+        
         if(result){
             setReload(!reload);
         }
@@ -20,51 +22,51 @@ export default function ModalAdd({idModal}){
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title" id="staticBackdropLabel">
-                            Agregar refaccion
+                            Editar refaccion
                             <span className="d-none" id="queryAlertMove">
 
                             </span>
                         </h5>
                     </div>
-                    <form id="addProductForm" className="modal-body">
+                    <form id="editRefactionForm" className="modal-body">
 
                     <InlineInput
                         label="Cantidad"
                         type="number"
-                        htmlFor="quantity"
+                        htmlFor="editQuantity"
                         required={true}
                         placeholder = 'Obligatorio'
-                        id='quantity'
+                        id='editQuantity'
                         css='mt-2'
                     />
 
                     <InlineInput
                         label="Refaccion"
                         type="text"
-                        htmlFor="refaction"
+                        htmlFor="editRefaction"
                         required={true}
                         placeholder = 'Obligatorio'
-                        id='refaction'
+                        id='editRefaction'
                         css='mt-2'
                     />
 
                     <InlineInput
                         label="Marca"
                         type="text"
-                        htmlFor="fabricant"
+                        htmlFor="editFabricant"
                         required={true}
                         placeholder = 'Obligatorio'
-                        id='fabricant'
+                        id='editFabricant'
                         css='mt-2'
                     />
 
                     <InlineInput
                         label="Modelo"
                         type="text"
-                        htmlFor="model"
+                        htmlFor="editModel"
                         required={true}
                         placeholder = 'Obligatorio'
-                        id='model'
+                        id='editModel'
                         css='mt-2'
                     />
 
@@ -72,7 +74,7 @@ export default function ModalAdd({idModal}){
                     <div className="modal-footer">
                         <button 
                             type="button" 
-                            id="closeAddProduct"
+                            id="closeEditRefaction"
                             className="w-25 cancelBtn" 
                             data-dismiss="modal">
                                 Cerrar
@@ -80,9 +82,9 @@ export default function ModalAdd({idModal}){
 
                         <button 
                             type="button" 
-                            onClick={()=>triggerAdd()}
+                            onClick={()=>triggerEdit()}
                             className="w-25 customBtn">
-                            Agregar
+                            Actualizar
                         </button>
                     </div>
                 </div>
