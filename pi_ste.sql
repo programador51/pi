@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-05-2021 a las 02:05:01
+-- Tiempo de generación: 17-05-2021 a las 03:03:43
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -233,6 +233,27 @@ INSERT INTO `movimientos` (`idMovimiento`, `nombre`, `tipo`, `precio`, `idCorte`
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `pedidos`
+--
+
+CREATE TABLE `pedidos` (
+  `pedido` int(11) NOT NULL,
+  `cantidad` int(10) NOT NULL,
+  `refaccion` varchar(40) NOT NULL,
+  `marca` varchar(40) NOT NULL,
+  `modelo` varchar(40) NOT NULL,
+  `costoTotal` float NOT NULL,
+  `concepto` longtext DEFAULT NULL,
+  `dia` int(2) NOT NULL,
+  `mes` int(2) NOT NULL,
+  `yearTime` int(4) NOT NULL,
+  `surtido` tinyint(4) NOT NULL,
+  `sucursal` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `servicios`
 --
 
@@ -334,15 +355,18 @@ INSERT INTO `ticketestados` (`idTicketsEstado`, `idEstadoTicketNombre`, `ticketC
 CREATE TABLE `usuario` (
   `id` int(11) NOT NULL,
   `username` varchar(15) NOT NULL,
-  `password` varchar(100) NOT NULL
+  `password` varchar(100) NOT NULL,
+  `rol` int(11) NOT NULL,
+  `sucursal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id`, `username`, `password`) VALUES
-(1, 'jperez', '$2b$10$mNqPVtBD1F7fZvV/ZlMCbO/oJTihkCq9m5K3dkRKtpHVeJ5C.uIJS');
+INSERT INTO `usuario` (`id`, `username`, `password`, `rol`, `sucursal`) VALUES
+(1, 'jperez', '$2b$10$mNqPVtBD1F7fZvV/ZlMCbO/oJTihkCq9m5K3dkRKtpHVeJ5C.uIJS', 1, 1),
+(2, 'luisj', '$2b$10$IDgsHen/yD18CxtRrzah6es7bqp7VQBsriDLmJF3P0LbBZbbqJIc.', 2, 1);
 
 --
 -- Índices para tablas volcadas
@@ -408,6 +432,12 @@ ALTER TABLE `inventario`
 --
 ALTER TABLE `movimientos`
   ADD PRIMARY KEY (`idMovimiento`);
+
+--
+-- Indices de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  ADD PRIMARY KEY (`pedido`);
 
 --
 -- Indices de la tabla `servicios`
@@ -498,6 +528,12 @@ ALTER TABLE `movimientos`
   MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `servicios`
 --
 ALTER TABLE `servicios`
@@ -519,7 +555,7 @@ ALTER TABLE `ticketestados`
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
