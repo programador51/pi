@@ -21,7 +21,7 @@ export default function Login(props) {
         <div className="row">
           <form className="col-12 ">
             <img
-              src={`${URL_CLIENT}media/logo.png`}
+              src='https://res.cloudinary.com/dmtvwe2ur/image/upload/v1621226317/logo_igsd6n.png'
               alt="logotipo-ste-soluciones"
               className="mt-3"
             />

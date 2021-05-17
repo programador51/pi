@@ -10,6 +10,8 @@ import Manage from './pages/Manage/Manage';
 import Inventory from './pages/Inventory/Inventory';
 import Refactions from './pages/Refactions/Refactions';
 import Moves from './pages/Moves/Moves';
+import Despatch from './pages/Despatch/Despatch';
+
 import UtilitiesState from './context/View/ViewState';
 
 function App() {
@@ -23,6 +25,7 @@ function App() {
             <Route exact path="/inventario" component={Inventory} />
             <Route exact path="/refacciones" component={Refactions} />
             <Route exact path="/movimientos" component={Moves} />
+            <Route exact path="/despacho" component={Despatch}/>
           </Switch>
         </Router>
       </UtilitiesState>
