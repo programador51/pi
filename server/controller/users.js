@@ -30,7 +30,8 @@ class User{
             if(result===true){
                 return response.json({
                     status:200,
-                    message:`Credenciales correctas`
+                    message:`Credenciales correctas`,
+                    user:request.body.userInfo[0]
                 });
             }
 

@@ -178,3 +178,50 @@ export async function addCategory(){
         console.log(error);
     }
 }
+
+// LOGIN
+export async function login(e){
+
+    e.preventDefault();
+
+    const userName = document.getElementById('userName').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const { data } = await axios.post(`${URL_API}usuarios/login`,{
+            userName,
+            password
+        });
+    
+        if(data.status===200){
+
+            let redirect = ``;
+
+            if(data.user.rol === 1 || data.user.rol === 3){
+                redirect = '/gestion';
+            }else{
+                redirect = '/despacho';
+            }
+
+            localStorage.setItem('userInfo',JSON.stringify(data.user));
+            
+            return [true,redirect];
+        }
+    
+        queryError(`Usuario o credenciales incorrectas`);
+
+        return [false,''];
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// REFACTIONS
+/* export async function getRefactionsDay(){
+    try {
+        const { data } = axios.get()
+    } catch (error) {
+        console.log(error);
+    }
+} */

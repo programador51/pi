@@ -1,12 +1,25 @@
 import React from "react";
 import { URL_CLIENT } from "../../config";
+import { login } from '../../helpers/apis';
+import { Redirect } from 'react-router-dom';
 
-export default function Login() {
+export default function Login(props) {
+
+  async function triggerLogin(e){
+    const [resultLogin,redirect] = await login(e);
+
+    if(resultLogin){
+      console.log('Redireccionando...');
+      props.history.push(redirect);
+    }
+
+  }
+
   return (
     <div class="login ">
       <div className="container justify-content-center d-flex align-items-center">
         <div className="row">
-          <form action="" className="col-12 ">
+          <form className="col-12 ">
             <img
               src={`${URL_CLIENT}media/logo.png`}
               alt="logotipo-ste-soluciones"
@@ -26,7 +39,10 @@ export default function Login() {
               placeholder="Contraseña"
               required
             />
-            <button id="btnLogin" class="mt-3 customBtn">
+            <button 
+              id="btnLogin" 
+              onClick={(e)=>triggerLogin(e)}
+              class="mt-3 customBtn">
               Login
             </button>
           </form>

@@ -1,12 +1,26 @@
 const db = require('../config');
+/*
+rol
+    1 - PC
+    2 - Movil
+    3 - SuperAdmin
+
+sucursal
+    1 - San Nicolas
+    2 - Monterrey
+    3 - Guadalupe
+    4 - Apodaca    
+*/
 
 class User{
     async signUp(request,response,next){
-        await db.query(`INSERT INTO usuario values (?,?,?)`,
+        await db.query(`INSERT INTO usuario values (?,?,?,?,?)`,
         [
             null,
             request.body.userName,
-            request.body.hashPass
+            request.body.hashPass,
+            request.body.rol,
+            request.body.sucursal
         ],
         (error,result,columns)=>{
             if(error){
