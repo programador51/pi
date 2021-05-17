@@ -1,0 +1,17 @@
+input,select,textarea{
+    border-radius: 0.1875em;
+    border:0.0625em solid #000;
+    padding:0 0 0 1em;
+}
+
+input,select{
+    height: 3.125em;
+}
+
+textarea{
+    height: 8em;
+}
+
+label{
+    font-weight: bold;
+}

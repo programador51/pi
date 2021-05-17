@@ -1,0 +1,10 @@
+.login{
+    background:#fff url($url + 'media/bg-ste.png') no-repeat left;
+    background-size: 25%;
+    height: 100vh;
+    img{
+        display: block;
+        max-width: 300px;
+        margin:auto;
+    }
+}

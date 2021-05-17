@@ -1,0 +1,27 @@
+.customBtn{
+    background-color: #182E46;
+    border:none;
+    color:#fff;
+    text-align: center;
+    width: 100%;
+    padding: 10px 0;
+    margin: 0 10px;
+}
+
+.cancelBtn{
+    background-color: #fff;
+    border:none;
+    color:#000;
+    text-align: center;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.manageButtons{
+    margin-left: 10%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 30vh;
+    width: 90%;
+}

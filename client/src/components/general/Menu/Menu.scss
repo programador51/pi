@@ -1,0 +1,28 @@
+.menu{
+    position: fixed;
+    z-index: 100;
+    margin: 0 0;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    background-color: #182E46;
+    width: 10%;
+    color:#fff;
+    height: 100vh;
+    div{
+        cursor: pointer;
+        text-align: left;
+        margin:auto;
+        svg{
+            font-size: 3.125em;
+        }
+        p{
+            font-size: 1.5em;
+            margin: 0 0 0 0.4em;
+        }
+    }
+}
+
+.rotate-l90{
+    transform: rotate(90deg);
+}
