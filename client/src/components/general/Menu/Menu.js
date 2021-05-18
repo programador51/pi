@@ -3,9 +3,7 @@ import MenuItem from "./ItemMenu";
 import "./Menu.scss";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
-import { faWrench } from "@fortawesome/free-solid-svg-icons";
-import { faBoxes } from "@fortawesome/free-solid-svg-icons";
+import { faDollarSign,faWrench,faBoxes } from "@fortawesome/free-solid-svg-icons";
 
 export default function Menu() {
   const inventory = <FontAwesomeIcon icon={faBoxes} />;

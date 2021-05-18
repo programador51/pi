@@ -23,6 +23,12 @@ export default function Refactions() {
     const initialLoad = async () => {
       setIsFetching(true);
       const data = await getRefactions();
+
+      if(!data){
+        console.log(`No hay refacciones!`);
+        return;
+      }
+
       setRefactions(data);
       setIsFetching(false);
     };

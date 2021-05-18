@@ -116,6 +116,29 @@ class Refaction {
         }
         )
     }
+
+    async dispatch(request,response,next){
+
+        console.log(`■ Dispatching refaction...`);
+
+        await db.query(`UPDATE pedidos set
+            surtido = 1
+            WHERE pedido = ?
+        `,request.body.id,(error,result,columns)=>{
+            if(error){
+                console.log(error);
+                return response.json({
+                    status:500,
+                    error
+                });
+            }
+
+            return response.json({
+                status:200,
+                message:`Pedido despachado`
+            });
+        })
+    }
 }
 
 const ModelRefaction = new Refaction();

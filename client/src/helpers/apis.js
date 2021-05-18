@@ -335,3 +335,42 @@ export async function editRefaction(id){
         console.log(error);
     }
 }
+
+export async function refactionsOffice(office){
+
+    const today = getActualDate();
+
+    try {
+        // refacciones/sucursal/dia/mes/año
+        const { data } = await axios.get(`${URL_API}refacciones/${office}/${today.numberDate.day}/${today.numberDate.month+1}/${today.numberDate.year}`);
+
+        if(data.status===200){
+            console.log('Refactions obtained');
+            return data.refactions;
+        }
+        
+        queryError(data.error);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function confirmDispatchRefaction(id){
+    try {
+        // refacciones/despachar
+        const { data } = await axios.post(`${URL_API}refacciones/despachar`,{
+            id
+        });
+
+        if(data.status===200){
+            querySuccess(data.message);
+            return true;
+        }
+        
+        queryError(data.error);
+
+    } catch (error) {
+        console.log(error);
+    }
+}

@@ -21,6 +21,12 @@ export default function Manage() {
   useEffect(()=>{
     const initialLoad = async() =>{
       const [moves,cashRegister] = await fetchManage(actualDate.numberDate.day,actualDate.numberDate.month+1,actualDate.numberDate.year);
+      
+      console.log(moves);
+      if(!moves){
+        return;
+      }
+
       setManage([{
         moves,
         cashRegister

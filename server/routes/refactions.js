@@ -19,4 +19,8 @@ router.post('/editar',
     ModelRefaction.update
 );
 
+router.post('/despachar',
+    ModelRefaction.dispatch
+);
+
 module.exports = router;
