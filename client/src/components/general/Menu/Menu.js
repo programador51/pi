@@ -33,21 +33,21 @@ export default function Menu() {
       (
           <>
           <MenuItem 
-            icon={refactions} 
+            icon={manage} 
             text='Refacciones' 
             link='refacciones'
             aditionalClass='w-50'
         />
           <MenuItem icon={inventory} text='Inventario' link='inventario'/>
-          <MenuItem icon={manage} text='Gestion' link='gestion'/>
+          <MenuItem icon={refactions} text='Gestion' link='gestion'/>
           </>
       )
       
       : (
         <>
-          <MenuItem icon={refactions} />
-          <MenuItem icon={inventory} />
           <MenuItem icon={manage} />
+          <MenuItem icon={inventory} />
+          <MenuItem icon={refactions} />
         </>
       )}
     </div>

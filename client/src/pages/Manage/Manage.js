@@ -4,16 +4,23 @@ import { getActualDate,months } from '../../helpers/dates';
 import {fetchManage} from '../../helpers/apis';
 import { Link } from 'react-router-dom';
 import { calculateCash } from '../../helpers/manage';
+import ModalReport from './ModalReport';
 import { formatMoney } from '../../helpers/numbers';
+import './Manage.scss';
 
 export default function Manage() {
 
   document.title = `Gestion`;
 
-  const [manage,setManage] = useState([{
-    moves:null,
-    cashRegister:0
-  }])
+  const [isFetching , setIsFetching] = useState(true);
+
+  const [cash,setCash] = useState({
+    cashRegister:0,
+    expenses:0,
+    incomes:0,
+    expensesMoves:[],
+    incomesMoves:[]
+  });
 
   const actualDate = getActualDate();
   const stringDate = `${actualDate.numberDate.day}-${months[actualDate.numberDate.month+1]}-${actualDate.numberDate.year}`;
@@ -22,21 +29,33 @@ export default function Manage() {
     const initialLoad = async() =>{
       const [moves,cashRegister] = await fetchManage(actualDate.numberDate.day,actualDate.numberDate.month+1,actualDate.numberDate.year);
       
+      let movesIncomes = [];
+      let movesExpenses = [];
+
       console.log(moves);
       if(!moves){
         return;
       }
 
-      setManage([{
-        moves,
-        cashRegister
-      }]);
+      moves.map(move=>{
+        {move.tipo === 1 ? movesIncomes.push(move) : movesExpenses.push(move)}
+      })
       
       const [totalCashRegister,income,expenses] = calculateCash(cashRegister,moves);
+
+      setCash({
+        cashRegister:totalCashRegister,
+        expenses:expenses,
+        incomes:income,
+        movesIncomes,
+        movesExpenses
+      });
 
       document.getElementById('cashRegister').value = formatMoney.format(totalCashRegister);
       document.getElementById('income').value = formatMoney.format(income);
       document.getElementById('expenses').value = formatMoney.format(expenses);
+
+      setIsFetching(false);
     }
 
     initialLoad();
@@ -99,6 +118,8 @@ export default function Manage() {
           </div>
         </form>
 
+        {isFetching ? null : <ModalReport dataManage={cash} idModal='modalSelectReport'/> }
+
         <div className="manageButtons">
 
           <Link to="/movimientos" className="w-25">
@@ -107,7 +128,11 @@ export default function Manage() {
             </button>
           </Link>
 
-          <button id="btnGenerateReport" className="w-25 customBtn">
+          <button 
+            data-toggle="modal" 
+            data-target="#modalSelectReport"
+            id="btnGenerateReport" 
+            className="w-25 customBtn">
             Generar reporte
           </button>
 

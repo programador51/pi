@@ -374,3 +374,20 @@ export async function confirmDispatchRefaction(id){
         console.log(error);
     }
 }
+
+async function getMovesMonth(){
+    try {
+
+        const today = getActualDate();
+
+        const { data } = await axios.get(`${URL_API}movimientos/mensual/${(today.numberDate.month)+1}/${today.numberDate.year}`);
+
+        if(data.status!==200){
+            return;
+        }
+        return data.moves;
+
+    } catch (error) {
+        console.log(error);
+    }
+}
