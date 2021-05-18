@@ -1,15 +1,14 @@
 import React from 'react';
 import { jsPDF } from "jspdf";
-import {months} from '../../helpers/dates';
+import {months,getActualDate} from '../../helpers/dates';
 import {formatMoney} from '../../helpers/numbers'; 
 import {dayly,month} from './Images';
 import {getMovesMonth} from '../../helpers/apis';
+import {prepareReport} from '../../helpers/manage';
 
 export default function ModalReport({ idModal, dataManage }) {
 
-    const triggerGenerate = async()=>{
-        fillTable()
-    }
+    const today = getActualDate();
 
     const file = new jsPDF('0.1','pt','a4');
 
@@ -24,6 +23,40 @@ export default function ModalReport({ idModal, dataManage }) {
         <th class="text-center">Precio</th>
         <th class="text-center">Concepto</th>
     </tr>`;
+
+    let tableIncomes = ``;
+    let tableExpenses = ``;
+
+    const triggerGenerate = async()=>{
+        const moves = await getMovesMonth();
+        const infoReport = prepareReport(moves);
+        const [incomes,expenses] = fillTable(infoReport.listIncomes,infoReport.listExpenses);
+
+        const file = new jsPDF('0.1','pt','a4'); 
+
+        file.setFontSize(14);
+        file.addImage(month, 'PNG', 100, 0, 0, 0);
+        file.html(`
+        <table style="width:500px;font-size:10px;">
+            ${expensesHeader}
+            ${headerIncomes}${expenses}
+        </table>
+        
+        <br><br>
+
+        <table style="width:500px;font-size:10px;">
+            ${incomesHeader}
+            ${headerIncomes}${incomes}
+        </table>
+
+        `, {
+            callback: (file) => {
+                file.save(`reporte-mensual-${today.stringDate}`);
+            },
+            x: 50,
+            y: 150
+        })
+    }
 
     let bodyIncomes = ``;
     let bodyExponses = ``;
@@ -64,26 +97,37 @@ export default function ModalReport({ idModal, dataManage }) {
 
         `, {
             callback: (file) => {
-                file.save();
+                file.save(`reporte-diario-${today.stringDate}`);
             },
             x: 50,
             y: 150
         })
     }
 
-    let tableIncomes = ``;
-    let tableExpenses = ``;
-
-    let dataIncomes = [];
-
-
     function fillTable(incomes,exponses){
         tableIncomes = ``;
         tableExpenses = ``;
 
-        incomes.map(incomes=>{
-
+        incomes.map(move=>{
+            tableIncomes+=`<tr>
+            <td class="text-center">${move.idMovimiento}</td>
+            <td class="text-center">${move.diaMovimiento}-${months[move.mesMovimiento]}-${move.yearMovimiento}</td>
+            <td class="text-center">${formatMoney.format(move.precio)}</td>
+            <td class="text-center">${move.nombre}</td>
+        </tr>
+            `
         })
+
+        exponses.map(move=>{
+            tableExpenses+=`<tr>
+            <td class="text-center">${move.idMovimiento}</td>
+            <td class="text-center">${move.diaMovimiento}-${months[move.mesMovimiento]}-${move.yearMovimiento}</td>
+            <td class="text-center">${formatMoney.format(move.precio)}</td>
+            <td class="text-center">${move.nombre}</td>
+        </tr>`;
+        });
+
+        return [tableIncomes,tableExpenses]
     }
 
     function generateReport(){

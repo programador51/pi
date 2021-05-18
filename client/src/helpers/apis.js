@@ -375,7 +375,7 @@ export async function confirmDispatchRefaction(id){
     }
 }
 
-async function getMovesMonth(){
+export async function getMovesMonth(){
     try {
 
         const today = getActualDate();

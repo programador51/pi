@@ -21,7 +21,7 @@ export function getActualDate(){
     const year = today.getFullYear();
 
     return {
-        stringDate:`${day}-${months[month]}-${year}`,
+        stringDate:`${day}-${months[month+1]}-${year}`,
         dateJS:today,
         numberDate:{
             day,
