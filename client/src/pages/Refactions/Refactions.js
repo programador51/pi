@@ -9,20 +9,24 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import {showOptions,setInfoModal} from '../../helpers/refactions';
 import { deleteRefaction } from '../../helpers/alerts'; 
+import './Refactions.scss';
 
 export default function Refactions() {
   document.title = `Refacciones`;
 
   const { reload,infoRow,selectedRow } = useContext(UtilitiesContext);
 
-  const status = <FontAwesomeIcon icon={faCheckCircle} />;
+  const status = <FontAwesomeIcon icon={faCheckCircle} id='iconReady'/>;
 
   const [refactions, setRefactions] = useState([]);
   const [isFetching, setIsFetching] = useState(true); 
+  const [ready,setReady] = useState('');
+
   useEffect(() => {
     const initialLoad = async () => {
       setIsFetching(true);
       const data = await getRefactions();
+      let ready = true;
 
       if(!data){
         console.log(`No hay refacciones!`);
@@ -31,6 +35,17 @@ export default function Refactions() {
 
       setRefactions(data);
       setIsFetching(false);
+
+      data.map(info=>{
+        if(info.surtido===0){
+          console.log(`no surtido`)
+          ready = false;
+        }
+      });
+
+      if(ready){
+        document.getElementById('iconReady').classList.add('refactionReady');
+      }
     };
 
     initialLoad();
