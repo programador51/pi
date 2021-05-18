@@ -30,10 +30,13 @@ export function prepareReport(moves){
 
     });
 
+    const utilities = income - expenses;
+
     return {
         income,
         expenses,
         listIncomes,
-        listExpenses
+        listExpenses,
+        utilities
     }
 }

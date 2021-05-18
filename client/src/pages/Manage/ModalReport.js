@@ -12,9 +12,17 @@ export default function ModalReport({ idModal, dataManage }) {
 
     const file = new jsPDF('0.1','pt','a4');
 
+    const headerResumen1 = `<tr><th colspan="3" class="text-center">Ingresos - Egresos = Utilidades </th></tr>`;
+
     const expensesHeader = `<tr><th colspan="4" class="text-center                  text-danger">Egresos</th></tr>`;
 
     const incomesHeader = `<tr><th colspan="4" class="text-center                  text-success">Ingresos</th></tr>`
+
+    const headerResumen2 = `${headerResumen1}<tr>
+        <th class="text-center">Ingresos</th>
+        <th class="text-center">Egresos</th>
+        <th class="font-weight-bold text-center">Precio</th>
+    </tr>`
 
     const headerIncomes = `
     <tr>
@@ -47,6 +55,20 @@ export default function ModalReport({ idModal, dataManage }) {
         <table style="width:500px;font-size:10px;">
             ${incomesHeader}
             ${headerIncomes}${incomes}
+        </table>
+
+        <br><br>
+        <table style="width:500px;font-size:10px;">
+            ${headerResumen2}
+            <tr>
+                <th class="text-center">${formatMoney.format(infoReport.income)}</th>
+                <th class="text-center">${formatMoney.format(infoReport.expenses)}</th>
+                <th class="font-weight-bold text-center
+                ${infoReport.utilities > 0 ? 'text-success' : 'text-danger'}
+                ">
+                    ${formatMoney.format(infoReport.utilities)}
+                </th>
+            </tr>
         </table>
 
         `, {
