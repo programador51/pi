@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { calculateCash } from '../../helpers/manage';
 import ModalReport from './ModalReport';
 import { formatMoney } from '../../helpers/numbers';
+import { validateRol } from '../../helpers/auth';
+
 import './Manage.scss';
 
 export default function Manage() {
@@ -57,6 +59,7 @@ export default function Manage() {
 
       setIsFetching(false);
     }
+    validateRol();
 
     initialLoad();
 

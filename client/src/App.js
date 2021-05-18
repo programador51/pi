@@ -11,6 +11,7 @@ import Inventory from './pages/Inventory/Inventory';
 import Refactions from './pages/Refactions/Refactions';
 import Moves from './pages/Moves/Moves';
 import Despatch from './pages/Despatch/Despatch';
+import Forbidden from './pages/Forbidden/Forbidden'
 
 import UtilitiesState from './context/View/ViewState';
 
@@ -26,6 +27,7 @@ function App() {
             <Route exact path="/refacciones" component={Refactions} />
             <Route exact path="/movimientos" component={Moves} />
             <Route exact path="/despacho" component={Despatch}/>
+            <Route exact path="/bloqueo" component={Forbidden}/>
           </Switch>
         </Router>
       </UtilitiesState>

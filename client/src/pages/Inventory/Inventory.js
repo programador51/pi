@@ -9,6 +9,7 @@ import UtilitiesContext from '../../context/View/ViewContext';
 import ModalEdit from './ModalEdit';
 import ModalAdd from './ModalAdd';
 import ModalAddCategory from './ModalAddCategory';
+import { validateRol } from '../../helpers/auth';
 
 export default function Inventory() {
 
@@ -39,6 +40,7 @@ export default function Inventory() {
             setCategorys(fetchedCategorys);
             setFetchedCategorys(true);
         }
+        validateRol();
 
         initialLoad();
     },[reload])

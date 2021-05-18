@@ -4,6 +4,7 @@ import Table from "../../components/general/Table/Table";
 import { fetchAllMoves } from "../../helpers/apis";
 import ModalAddMove from '../../components/general/Modal/ModalAddMove';
 import UtilitiesContext from '../../context/View/ViewContext';
+import { validateRol } from '../../helpers/auth';
 
 export default function Moves() {
   const [moves, setMoves] = useState([]);
@@ -17,7 +18,7 @@ export default function Moves() {
       setMoves(movesFetched);
       setIsFetching(false);
     };
-
+    validateRol();
     initialLoad();
   }, [reload]); // eslint-disable-line react-hooks/exhaustive-deps
 

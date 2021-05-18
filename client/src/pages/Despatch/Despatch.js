@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { SelectInput } from "../../components/individual/Inputs";
 import CardRefaction from "../../components/individual/CardRefaction/CardRefaction";
 import UtilitiesContext from "../../context/View/ViewContext";
 import { refactionsOffice } from "../../helpers/apis";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRedoAlt } from "@fortawesome/free-solid-svg-icons";
+import { validateRol } from '../../helpers/auth';
 
 export default function Despatch() {
   const [refactions, setRefactions] = useState({});
@@ -24,8 +24,8 @@ export default function Despatch() {
       setRefactions(fetchedRefactions);
       setIsFetching(false);
     };
-
-    initialLoad();
+    validateRol();
+    initialLoad();  
   }, [reload]);
 
   const branches = [

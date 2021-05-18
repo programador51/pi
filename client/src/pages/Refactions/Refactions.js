@@ -10,6 +10,7 @@ import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import {showOptions,setInfoModal} from '../../helpers/refactions';
 import { deleteRefaction } from '../../helpers/alerts'; 
 import './Refactions.scss';
+import { validateRol } from '../../helpers/auth';
 
 export default function Refactions() {
   document.title = `Refacciones`;
@@ -47,6 +48,7 @@ export default function Refactions() {
         document.getElementById('iconReady').classList.add('refactionReady');
       }
     };
+    validateRol();
 
     initialLoad();
   }, [reload]);
