@@ -38,7 +38,7 @@ class Refaction {
         dia = ? AND
         mes = ? AND
         yearTime = ? AND
-        sucursal = ?`,
+        sucursal = ? ORDER BY surtido ASC`,
         [
             request.params.day,
             request.params.month,

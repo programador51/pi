@@ -12,7 +12,7 @@ export function InlineInput({
     <div className={`d-flex justify-content-center align-items-center ${css}`}>
 
     <label 
-        class="text-right mr-2 w-25" 
+        className="text-right mr-2 w-25" 
         htmlFor={htmlFor}>
         {label}
     </label>
@@ -20,7 +20,7 @@ export function InlineInput({
         <input
         id={id}
         type={type}
-        class="d-inline w-60"
+        className="d-inline w-60"
         required = {required}
         placeholder={placeholder}
         />
@@ -31,11 +31,11 @@ export function InlineInput({
 export function SelectInput({ options, id, htmlFor, label,css,attributes }) {
   return (
     <div className={`d-flex justify-content-center align-items-center ${css}`}>
-      <label class="text-right mr-2 w-25" htmlFor={htmlFor}>
+      <label className="text-right mr-2 w-25" htmlFor={htmlFor}>
         {label}
       </label>
 
-      <select name={htmlFor} id={id} class="w-60" required>
+      <select name={htmlFor} id={id} className="w-60" required>
         {options.map((option) => {
           return (
             <option id={option[attributes.id]} value={option[attributes.value]}>
