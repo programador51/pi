@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-05-2021 a las 07:02:31
+-- Tiempo de generación: 18-05-2021 a las 05:31:48
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -113,7 +113,8 @@ INSERT INTO `dinero` (`idEstadoCaja`, `montoInicial`, `montoFinal`, `dia`, `mes`
 (6, 350.01, 0, 13, 5, 2021),
 (7, 350.01, 0, 14, 5, 2021),
 (8, 350.01, 0, 15, 5, 2021),
-(9, 350.01, 0, 16, 5, 2021);
+(9, 350.01, 0, 16, 5, 2021),
+(10, 350.01, 0, 17, 5, 2021);
 
 -- --------------------------------------------------------
 
@@ -191,13 +192,6 @@ CREATE TABLE `inventario` (
   `precioVenta` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Volcado de datos para la tabla `inventario`
---
-
-INSERT INTO `inventario` (`codigo`, `nombre`, `descripcion`, `stock`, `categoria`, `precioCompra`, `precioVenta`) VALUES
-(14, 'Aire comprimido', 'Teclado ', 4, 1, 49.99, 74.99);
-
 -- --------------------------------------------------------
 
 --
@@ -244,7 +238,7 @@ CREATE TABLE `pedidos` (
   `dia` int(2) NOT NULL,
   `mes` int(2) NOT NULL,
   `yearTime` int(4) NOT NULL,
-  `surtido` tinyint(4) NOT NULL,
+  `surtido` tinyint(4) NOT NULL COMMENT '[0 - No] [1 - Si]',
   `sucursal` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -253,8 +247,9 @@ CREATE TABLE `pedidos` (
 --
 
 INSERT INTO `pedidos` (`pedido`, `cantidad`, `refaccion`, `marca`, `modelo`, `costoTotal`, `concepto`, `dia`, `mes`, `yearTime`, `surtido`, `sucursal`) VALUES
-(3, 10, 'Bateriaaaaaaa', 'Samsumg', 'Galaxy', 0, NULL, 16, 5, 2021, 0, 1),
-(6, 1, 'Batea', 'Xiaomi', 'Redmi a2 lite', 0, NULL, 16, 5, 2021, 0, 1);
+(12, 3, 'Centro carga', 'Apple', 'Iphone 5', 0, NULL, 17, 5, 2021, 0, 1),
+(13, 2, 'Mica', 'GlassPro', 'Iphone 5', 0, NULL, 17, 5, 2021, 0, 2),
+(14, 1, 'Funda uso rudo', 'GlassPro', 'Iphone 5', 0, NULL, 17, 5, 2021, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -494,7 +489,7 @@ ALTER TABLE `contacto`
 -- AUTO_INCREMENT de la tabla `dinero`
 --
 ALTER TABLE `dinero`
-  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
@@ -536,7 +531,7 @@ ALTER TABLE `movimientos`
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `servicios`
