@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import MenuItem from "./ItemMenu";
 import "./Menu.scss";
 
-import { FontAwesomeIcon } from "@cd fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign,faWrench,faBoxes } from "@fortawesome/free-solid-svg-icons";
 
 export default function Menu() {
