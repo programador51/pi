@@ -4,6 +4,9 @@
     margin-left: 10%;
     width: 90%;
     padding:2em;
+    background:url('https://res.cloudinary.com/dmtvwe2ur/image/upload/v1621226311/bg-ste_odr5gk.png') no-repeat left;
+    background-size: 25%;
+    height: 100vh;
 }
 
 a{
@@ -15,8 +18,22 @@ a{
     }
 }
 
+*{
+    font-family: 'Barlow'
+}
+
+
 @import './buttons.scss';
 @import './login.scss';
 @import './utilities.scss';
 @import './forms.scss';
 @import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+@import '../../node_modules/js-smart-table/dist/styles/main.css';
+body{
+    padding: 0;
+}
+
+.default-pagination{
+    position:relative;
+    bottom: 0;
+}

@@ -3,6 +3,124 @@ import { URL_API } from '../config';
 import { getActualDate } from '../helpers/dates';
 import { queryError, querySuccess } from '../helpers/alerts';
 
+export async function UpdateTicket(dataForm){
+    try {
+        
+        const { data } = await axios.put(`${URL_API}ticket`,dataForm);
+
+        if(data.status===200){
+
+            return true;
+        }
+
+        return false;
+
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+export async function GetTickets(page = 1,order = 'DESC',columnOrdering = 'na',aditionalQuery){
+
+    const errorQuery = {
+        pages:0,
+        actualPage:0,
+        tickets:[]
+    }   
+
+    try {
+        
+        const { data } = await axios.get(`${URL_API}ticket/tickets?pagina=${page}${aditionalQuery}`);
+
+        if(data.status===200){
+            return data.data;
+        }
+
+        return errorQuery
+
+    } catch (error) {
+
+        console.log(error);
+        return errorQuery;
+    }
+}
+
+/**
+ * Create a new ticket on DB
+ * 
+ * @param {object} ticketInfo - Ticket info
+ * @returns {boolean} True if ticket was created
+ */
+export async function AddTicket(ticketInfo){
+    try {
+        
+        const { data } = await axios.post(`${URL_API}ticket/crear`,ticketInfo);
+
+        if(data.status===200){
+            return true;
+        }else{
+            return false;
+        }
+
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+export async function GetPayMethods(){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}ticket/metodos-pago`);
+
+        if(data.status===200){
+            return data.payMethods
+        }else{
+            return [];
+        }
+
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+export async function GetRepairStatus(){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}ticket/reparacion/estatus`);
+
+        if(data.status===200){
+            return data.repairStatus
+        }else{
+            return [];
+        }
+
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+export async function GetServices(){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}servicios`);
+
+        if(data.status===200){
+            return data.services;
+        }else{
+            return [];
+        }
+
+    } catch (error) {
+        console.log(error);
+
+        return [];
+    }
+}
+
 // MANAGE
 export async function fetchManage(day, month, year) {
     try {
@@ -389,5 +507,51 @@ export async function getMovesMonth(){
 
     } catch (error) {
         console.log(error);
+    }
+}
+
+/**
+ * Get all the technicias of ST Soluciones
+ * 
+ * @returns {object[]} List of users
+ */
+export async function GetUsers(){
+    try {
+        const { data } = await axios.get(`${URL_API}usuarios/`);
+
+        if(data.status===200){
+            return data.users
+        }else{
+            return [];
+        }
+
+    } catch (error) {
+        console.log(error);
+
+        return [];
+    }
+}
+
+/**
+ * Get the info of a ticket
+ * @param {number|string} idTicket - Id of the ticket
+ * @returns {object} Information of the ticket
+ */
+export async function GetTicket(idTicket){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}ticket/${idTicket}`);
+
+        if(data.status===200){
+            return data.ticket;
+        }
+
+        return null;
+
+    } catch (error) {
+
+        console.log(error);
+
+        return null;
     }
 }

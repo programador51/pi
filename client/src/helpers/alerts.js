@@ -14,12 +14,12 @@ export function deleteSuccess(message, idRow) {
     })
 }
 
-export function querySuccess(message){
+export function querySuccess(message,cb = () => {}){
     sa2.fire({
         title:message,
         icon:'success'
     }).then(result=>{
-        return true;
+        cb();
     });
 }
 

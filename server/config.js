@@ -2,7 +2,7 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
     host:'localhost',
     user:'root',
-    password:'',
+    password:'jl1731168',
     database:'pi_ste'
 });
 
@@ -20,6 +20,25 @@ connection.connect(e=>{
         return
     }
     console.log(`■ Connected to db success`);
+});
+
+function reconnect(){
+    connection.connect(e=>{
+        console.log('Reconnecting...');
+        if(e){
+            console.log(e);
+            return;
+        }
+    })
+}
+
+connection.on('error',error=>{
+    console.log('Database error',error);
+    if(error.code==='PROTOCOL_CONNECTION_LOST'){
+        reconnect();
+    }else{
+        throw error;
+    }
 });
 
 module.exports = connection;

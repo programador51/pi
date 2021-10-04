@@ -14,6 +14,9 @@ import Despatch from './pages/Despatch/Despatch';
 import Forbidden from './pages/Forbidden/Forbidden'
 
 import UtilitiesState from './context/View/ViewState';
+import { Ticket } from "./pages/Tickets/Tickets";
+import ListTickets from "./pages/ListTickets/ListTickets";
+import { Ticket as TicketInfo } from './pages/Ticket/Ticket';
 
 function App() {
   return (
@@ -28,6 +31,9 @@ function App() {
             <Route exact path="/movimientos" component={Moves} />
             <Route exact path="/despacho" component={Despatch}/>
             <Route exact path="/bloqueo" component={Forbidden}/>
+            <Route exact path="/tickets" component={Ticket}/>
+            <Route exact path="/tickets/ver" component={ListTickets}/>
+            <Route exact path="/tickets/ver/:idTicket" component={TicketInfo}/>
           </Switch>
         </Router>
       </UtilitiesState>

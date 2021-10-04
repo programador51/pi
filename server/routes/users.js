@@ -14,4 +14,8 @@ router.post('/login',
     UserController.validatePass
 );
 
+router.get('/',
+    UserModel.listUsers
+);
+
 module.exports = router;

@@ -8,7 +8,10 @@ import ModalReport from './ModalReport';
 import { formatMoney } from '../../helpers/numbers';
 import { validateRol } from '../../helpers/auth';
 
+import { Text } from '../../atoms/Inputs/Text/Text';
+
 import './Manage.scss';
+import ContainerManage from "./Styles";
 
 export default function Manage() {
 
@@ -68,7 +71,8 @@ export default function Manage() {
   return (
     <>
         <Menu/>
-      <div className="bodyContent">
+      <ContainerManage>
+        <div>
         <b className="mt-5">
           Fecha:
           <span> {stringDate}</span>
@@ -76,50 +80,106 @@ export default function Manage() {
 
         <form action="">
           <div className="form-group row mt-5">
-            <label htmlFor="caja" className="col-1 col-form-label">
+            <label htmlFor="caja" className="col-2 col-form-label">
               <b>Caja</b>
             </label>
             <div className="col-4">
-              <input
-                type="text"
-                id="cashRegister"
-                name="cashRegister"
-                className="form-control"
-                disabled
+              <Text
+                id = 'cashRegister'
+                name = 'cashRegister'
+                placeholder = 'No editable'
+                readOnly = {true}
               />
             </div>
           </div>
 
           <div className="form-group row mt-5">
-            <label htmlFor="ingresos" className="col-1 col-form-label">
+            <label htmlFor="ingresos" className="col-2 col-form-label">
               <b>Ingresos</b>
             </label>
             <div className="col-4">
-              <input
-                type="text"
-                id="income"
-                name="income"
-                className="form-control"
-                disabled
+              <Text
+                id = 'income'
+                name = 'income'
+                placeholder = 'No editable'
+                readOnly = {true}
               />
             </div>
           </div>
 
           <div className="form-group row mt-5">
-            <label htmlFor="gastos" className="col-1 col-form-label">
+            <label htmlFor="gastos" className="col-2 col-form-label">
               <b>Gastos</b>
             </label>
             <div className="col-4">
-              <input
-                type="text"
-                name="expenses"
-                id="expenses"
-                className="form-control"
-                disabled
+              <Text
+                id = 'expenses'
+                name = 'expenses'
+                placeholder = 'No editable'
+                readOnly = {true}
+              />
+            </div>
+          </div>
+
+          <div className="form-group row mt-5">
+            <label htmlFor="averageTicket" className="col-2 col-form-label">
+              <b>Ticket promedio</b>
+            </label>
+            <div className="col-4">
+              <Text
+                id = 'averageTicket'
+                name = 'averageTicket'
+                placeholder = 'No editable'
+                readOnly = {true}
+              />
+            </div>
+          </div>
+
+          <div className="form-group row mt-5">
+            <label htmlFor="rotationInventory" className="col-2 col-form-label">
+              <b>Rotacion inventario</b>
+            </label>
+            <div className="col-4">
+              <Text
+                id = 'rotationInventory'
+                name = 'rotationInventory'
+                placeholder = 'No editable'
+                readOnly = {true}
+              />
+            </div>
+          </div>
+
+          <div className="form-group row mt-5">
+            <label htmlFor="suministerDays" className="col-2 col-form-label">
+              <b>Dias de suministro</b>
+            </label>
+            <div className="col-4">
+              <Text
+                id = 'suministerDays'
+                name = 'suministerDays'
+                placeholder = 'No editable'
+                readOnly = {true}
+              />
+            </div>
+          </div>
+
+          <div className="form-group row mt-5">
+            <label htmlFor="suministerWeek" className="col-2 col-form-label">
+              <b>Semana de suministro</b>
+            </label>
+            <div className="col-4">
+              <Text
+                id = 'suministerWeek'
+                name = 'suministerWeek'
+                placeholder = 'No editable'
+                readOnly = {true}
               />
             </div>
           </div>
         </form>
+        </div>
+      
+        
 
         {isFetching ? null : <ModalReport dataManage={cash} idModal='modalSelectReport'/> }
 
@@ -140,7 +200,7 @@ export default function Manage() {
           </button>
 
         </div>
-      </div>
+      </ContainerManage>
     </>
   );
 }

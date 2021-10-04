@@ -23,7 +23,6 @@ export default function Login(props) {
             <img
               src='https://res.cloudinary.com/dmtvwe2ur/image/upload/v1621226317/logo_igsd6n.png'
               alt="logotipo-ste-soluciones"
-              className="mt-3"
             />
             <input
               id="userName"

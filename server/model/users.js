@@ -1,3 +1,5 @@
+//@ts-check
+
 const db = require('../config');
 /*
 rol
@@ -14,13 +16,17 @@ sucursal
 
 class User{
     async signUp(request,response,next){
-        await db.query(`INSERT INTO usuario values (?,?,?,?,?)`,
+        await db.query(`INSERT INTO usuario values (?,?,?,?,?,?,?,?,?)`,
         [
             null,
             request.body.userName,
             request.body.hashPass,
             request.body.rol,
-            request.body.sucursal
+            request.body.sucursal,
+            request.body.nombre,
+            request.body.nombre2,
+            request.body.paterno,
+            request.body.materno
         ],
         (error,result,columns)=>{
             if(error){
@@ -40,10 +46,33 @@ class User{
         )
     }
 
+    async listUsers(request,response,next){
+        await db.query(`CALL sp_GetUsers();
+        `,(error,results,columns)=>{
+
+            if(error){
+                return response.status(400).json({
+                    status:500,
+                    error
+                });
+            }
+
+            const users = results[0].map(user=>{
+                return{
+                    ...user,
+                    rol:JSON.parse(user.rol),
+                    name:JSON.parse(user.name)
+                }
+            });
+
+            return response.status(200).json({
+                status:200,
+                users
+            });
+        });
+    }
+
     async userCredentials(request,response,next){
-
-        console.log(`■ Finding user on db... ${request.body.userName}`)
-
         await db.query(`SELECT * FROM usuario WHERE username = ?`,
         request.body.userName,
         (error,result,columns)=>{
@@ -62,8 +91,6 @@ class User{
             }
 
             request.body.userInfo = result;
-
-            console.log(`■ User founded`);
             next();
         })
     }
