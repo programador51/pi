@@ -6,7 +6,14 @@ const mysql = require('mysql');
 //     database:'pi_ste'
 // });
 
-const connection = mysql.createConnection('mysql://u9eozuq0padsf9m9:LpICjrPxJmxSO5DvKh8m@bu18dkxus5zr3k8itrwj-mysql.services.clever-cloud.com:3306/bu18dkxus5zr3k8itrwj');
+// const connection = mysql.createConnection('mysql://u9eozuq0padsf9m9:LpICjrPxJmxSO5DvKh8m@bu18dkxus5zr3k8itrwj-mysql.services.clever-cloud.com:3306/bu18dkxus5zr3k8itrwj');
+const connection = mysql.createPool({
+    connectionLimit:100,
+    host:'bu18dkxus5zr3k8itrwj-mysql.services.clever-cloud.com',
+    user:'u9eozuq0padsf9m9',
+    password:'LpICjrPxJmxSO5DvKh8m',
+    database:'bu18dkxus5zr3k8itrwj'
+})
 
 connection.connect(e=>{
     if(e){
