@@ -10,6 +10,10 @@ router.get('/',
     ModelInvetory.getInventory
 );
 
+router.get('/disponible',
+    ModelInvetory.AvailableInventory
+);
+
 router.get('/categorias',
     ModelInvetory.getCategorys
 );
@@ -24,6 +28,10 @@ router.post('/borrar/producto',
 
 router.post('/editar/producto',
     ModelInvetory.editProduct
+);
+
+router.post('/solicitar',
+    ModelInvetory.RequestInventory
 );
 
 module.exports = router;

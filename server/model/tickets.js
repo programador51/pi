@@ -2,6 +2,37 @@ const db = require('../config');
 
 class Tickets {
 
+    // https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_date-format
+    // https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html#function_curdate
+    // https://www.mysqltutorial.org/mysql-variables/
+    // https://mysqlcode.com/mysql-format/
+    // https://www.tutorialspoint.com/storing-value-from-a-mysql-select-statement-to-a-variable
+
+    async GestionStatics(request, response) {
+        await db.query(`
+        CALL sp_GetManageStatics();
+        `,(error,result,columns)=>{
+            if (error) {
+                console.log(error);
+                return response.status(200).json({
+                    status: 400,
+                    error
+                });
+            }
+            
+            return response.status(200).json({
+                status:200,
+                statics:{
+                    ticketAverage:result[0][0],
+                    yearSolds:result[1][0],
+                    inventoryValue:result[2][0],
+                    rotation:result[1][0]['totalInventory'] / result[2][0]['inventoryValue']
+                }
+            });
+        });
+
+    }
+
     async repairStatus(request, response) {
         await db.query(
             `CALL sp_GetRepairStatus();`,
@@ -271,7 +302,7 @@ class Tickets {
         
         `,
             [request.body.repairStatus, request.body.idTicket],
-            (error, results, columns)=>{
+            (error, results, columns) => {
                 if (error) {
                     return response.status(200).json({
                         status: 400,

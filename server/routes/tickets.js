@@ -61,4 +61,8 @@ router.get('/:idTicket',
     ModelTickets.GetTicket
 );
 
+router.get('/gestion/estatus',
+    ModelTickets.GestionStatics
+);
+
 module.exports = router;

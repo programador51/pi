@@ -16,7 +16,8 @@ export default function Selection({
   placeholder = true,
   disabled = false,
   placeholderText = 'Selecciona',
-  forwardRef = () => {}
+  forwardRef = () => {},
+  onChange = () => {}
 }) {
 
   const [selectValue,setSelectValue] = useState(null);
@@ -33,7 +34,8 @@ export default function Selection({
   },[defaultValue,options]);
 
   const updateValue = (value) => {
-    setSelectValue(value)
+    setSelectValue(value);
+    onChange(value);
   }
 
   return (
@@ -45,7 +47,7 @@ export default function Selection({
             name={name}
             id={id} 
             {...forwardRef(name)} 
-            onClick = {(e)=>updateValue(e.target.value)}
+            onChange = {(e)=>updateValue(e.target.value)}
           >
 
             {placeholder === true && defaultValue === null ? <>

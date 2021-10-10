@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Menu from '../../components/general/Menu/Menu';
 import { getActualDate,months } from '../../helpers/dates';
-import {fetchManage} from '../../helpers/apis';
+import {fetchManage, GetManageStatics} from '../../helpers/apis';
 import { Link } from 'react-router-dom';
 import { calculateCash } from '../../helpers/manage';
 import ModalReport from './ModalReport';
@@ -24,7 +24,8 @@ export default function Manage() {
     expenses:0,
     incomes:0,
     expensesMoves:[],
-    incomesMoves:[]
+    incomesMoves:[],
+    ticketAverage:null
   });
 
   const actualDate = getActualDate();
@@ -34,6 +35,8 @@ export default function Manage() {
     const initialLoad = async() =>{
       const [moves,cashRegister] = await fetchManage(actualDate.numberDate.day,actualDate.numberDate.month+1,actualDate.numberDate.year);
       
+      const apiStatics = await GetManageStatics();
+
       let movesIncomes = [];
       let movesExpenses = [];
 
@@ -53,7 +56,8 @@ export default function Manage() {
         expenses:expenses,
         incomes:income,
         movesIncomes,
-        movesExpenses
+        movesExpenses,
+        ticketAverage:apiStatics.ticketAverage
       });
 
       document.getElementById('cashRegister').value = formatMoney.format(totalCashRegister);
@@ -130,6 +134,7 @@ export default function Manage() {
                 id = 'averageTicket'
                 name = 'averageTicket'
                 placeholder = 'No editable'
+                defaultValue = {cash.ticketAverage?.formated}
                 readOnly = {true}
               />
             </div>

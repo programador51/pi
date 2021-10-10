@@ -10,6 +10,8 @@ import ModalEdit from './ModalEdit';
 import ModalAdd from './ModalAdd';
 import ModalAddCategory from './ModalAddCategory';
 import { validateRol } from '../../helpers/auth';
+import Modal from "../../components/general/Modal/Modal";
+import ModalRequest from "./ModalRequest";
 
 export default function Inventory() {
 
@@ -66,6 +68,8 @@ export default function Inventory() {
           >
             Agregar producto
           </button>
+
+          <ModalRequest/>
         </div>
       
         {isFetching ? null : 

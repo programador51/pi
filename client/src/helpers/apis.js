@@ -3,6 +3,55 @@ import { URL_API } from '../config';
 import { getActualDate } from '../helpers/dates';
 import { queryError, querySuccess } from '../helpers/alerts';
 
+/**
+ * Update the requested items
+ * @param {object} item - Information of the item requested
+ * @returns {boolean} True if query success
+ */
+export async function UpdateRequestItem(item){
+    try {
+        
+        const { data } = await axios.post(`${URL_API}inventario/solicitar`,item);
+
+        if(data.status===200) return true;
+
+        return false;
+
+    } catch (error) {
+        return false;
+    }
+}
+
+export async function GetManageStatics(){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}ticket/gestion/estatus`);
+
+        if(data.status===200) return data.statics;
+
+        return null;
+
+    } catch (error) {
+
+        return null;
+
+    }
+}
+
+export async function GetAvailableInventory(){
+    try {
+        
+        const { data } = await axios.get(`${URL_API}inventario/disponible`);
+
+        if(data.status===200) return data.inventory;
+
+        return [];
+
+    } catch (error) {
+        return [];
+    }
+}
+
 export async function UpdateTicket(dataForm){
     try {
         

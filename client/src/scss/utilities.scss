@@ -1,3 +1,5 @@
+$baseMargin:5;
+
 .w-25{
     width: 25%;
 }
@@ -49,4 +51,12 @@
 
 .w-60{
     width: 60%;
+}
+
+.mr-3{
+    margin-right: ($baseMargin*3)px !important;
+}
+
+.mt-3{
+    margin-right: ($baseMargin*3)px !important;
 }
