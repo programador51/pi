@@ -57,7 +57,10 @@ export default function Manage() {
         incomes:income,
         movesIncomes,
         movesExpenses,
-        ticketAverage:apiStatics.ticketAverage
+        ticketAverage:apiStatics.ticketAverage,
+        rotation:apiStatics.rotation,
+        weekSuminister:apiStatics.weekSolds,
+        daySuminister:apiStatics.daySolds
       });
 
       document.getElementById('cashRegister').value = formatMoney.format(totalCashRegister);
@@ -149,6 +152,7 @@ export default function Manage() {
                 id = 'rotationInventory'
                 name = 'rotationInventory'
                 placeholder = 'No editable'
+                defaultValue = {formatMoney.format(cash.rotation)}
                 readOnly = {true}
               />
             </div>
@@ -163,6 +167,7 @@ export default function Manage() {
                 id = 'suministerDays'
                 name = 'suministerDays'
                 placeholder = 'No editable'
+                defaultValue = {formatMoney.format(cash.daySuminister)}
                 readOnly = {true}
               />
             </div>
@@ -178,6 +183,7 @@ export default function Manage() {
                 name = 'suministerWeek'
                 placeholder = 'No editable'
                 readOnly = {true}
+                defaultValue = {formatMoney.format(cash.weekSuminister)}
               />
             </div>
           </div>
