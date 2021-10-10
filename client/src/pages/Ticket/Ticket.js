@@ -20,6 +20,7 @@ import * as yup from 'yup';
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import useTicket from "./useTicket";
+import { formatMoney } from "../../helpers/numbers";
 
 export function Ticket() {
   const PhoneIcon = <FontAwesomeIcon icon={faPhoneAlt} />;
@@ -38,7 +39,7 @@ export function Ticket() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(yup.object({
-      repairStatus:yup.number().positive().required().typeError('Inserta un estatus valido')
+      repairStatus: yup.number().positive().required().typeError('Inserta un estatus valido')
     })),
     shouldFocusError: false,
     reValidateMode: "onSubmit"
@@ -48,7 +49,7 @@ export function Ticket() {
     (async function () {
       const apiTicket = await GetTicket(idTicket);
       reset({
-        repairStatus:apiTicket.idRepairStatus
+        repairStatus: apiTicket.idRepairStatus
       })
       setTicket(apiTicket);
     })();
@@ -57,13 +58,19 @@ export function Ticket() {
   const save = data => {
     updateTicket({
       ...data,
-      idTicket:ticket.id
+      idTicket: ticket.id
     });
   }
 
   return (
     <>
-      <Menu />
+      <Menu
+        linkAddTickets='../../tickets'
+        linkRefactions='../../refacciones'
+        linkInventory='../../inventario'
+        linkManage='../../gestion'
+        linkTickets='../../tickets/ver'
+      />
 
       {ticket !== null ? (
         <ContainerTicket onSubmit={handleSubmit(save)}>
@@ -107,8 +114,8 @@ export function Ticket() {
               <label htmlFor="">Estado de reparacion</label>
               <RepairStatus
                 defValue={ticket.idRepairStatus}
-                forwardRef = {register}
-                errors = {errors}
+                forwardRef={register}
+                errors={errors}
 
               />
             </div>
@@ -212,23 +219,26 @@ export function Ticket() {
 
           <div className="quotation">
             <label htmlFor="quotation">Cotizacion</label>
-            <Number
-              id="quotation"
-              name="quotation"
-              placeholder="Escribe aqui *"
+
+
+            <Text
+              id='quotation'
+              name='quotation'
+              placeholder='No editable'
               readOnly={true}
-              defValue={ticket.quotation}
+              defaultValue={formatMoney.format(ticket.quotation)}
             />
           </div>
 
           <div className="total">
             <label htmlFor="total">Total</label>
-            <Number
-              id="total"
-              name="total"
-              placeholder="Escribe aqui *"
+
+            <Text
+              id='total'
+              name='total'
+              placeholder='No editable'
               readOnly={true}
-              defValue={ticket.amount}
+              defaultValue={formatMoney.format(ticket.amount)}
             />
           </div>
 

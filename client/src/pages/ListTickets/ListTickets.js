@@ -47,6 +47,7 @@ export default function ListTickets() {
         linkInventory = '../inventario'
         linkAddTickets = '../tickets'
         linkTickets = '../tickets/ver'
+        linkManage = '../gestion'
       />
 
       <ContainerTable>
