@@ -1,12 +1,12 @@
 const mysql = require('mysql');
-// const connection = mysql.createConnection({
-//     host:'localhost',
-//     user:'root',
-//     password:'jl1731168',
-//     database:'pi_ste'
-// });
+const connection = mysql.createConnection({
+    host:'localhost',
+    user:'root',
+    password:'jl1731168',
+    database:'pi_ste'
+});
 
-const connection = mysql.createConnection('mysql://u9eozuq0padsf9m9:LpICjrPxJmxSO5DvKh8m@bu18dkxus5zr3k8itrwj-mysql.services.clever-cloud.com:3306/bu18dkxus5zr3k8itrwj');
+// const connection = mysql.createConnection('mysql://u9eozuq0padsf9m9:LpICjrPxJmxSO5DvKh8m@bu18dkxus5zr3k8itrwj-mysql.services.clever-cloud.com:3306/bu18dkxus5zr3k8itrwj');
 
 connection.connect(e=>{
     if(e){
