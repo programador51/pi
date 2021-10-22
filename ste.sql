@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-10-2021 a las 04:58:36
+-- Tiempo de generación: 22-10-2021 a las 06:04:06
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -186,10 +186,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDaySuminister` ()  BEGIN
     
     SET @suministerDay = @inventoryValue/@averageSellsDay;       
    
-   	SELECT 
-    	@suministerDay AS daySuminister,
-        @inventoryValue AS inventoryValue,
-        @averageSellsDay AS averageDay;
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryAvailable` ()  BEGIN
@@ -249,6 +245,33 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStatics` ()  BEGIN
     CALL sp_GetInventoryValue();
     CALL sp_GetWeekInventory();
     CALL sp_GetDayInventory();
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStaticsV2` ()  BEGIN 
+
+	CALL sp_GetDaySuminister();
+    
+    CALL sp_GetWeekSuminister();
+
+/* GENERATE DE JSON OBJECT */
+    SET @result = (SELECT 
+		JSON_OBJECT(
+        	'suministerDay', JSON_OBJECT(
+            'average',@suministerDay,
+            'averageSells',@averageSellsDay,
+            'inventoryValue',@inventoryValue
+            
+            ),
+            'suministerWeek',JSON_OBJECT(
+            'average',@suministerWeek,
+            'averageSells',@averageSellsWeek,
+            'inventoryValue',@inventoryValue
+            )
+        ) AS result);
+ 
+/* CREATE THE ROOT OF THE JSON */
+     SELECT @result AS result;
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetNoTickets` (IN `apiTecnico` INT)  BEGIN
@@ -428,10 +451,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetWeekSuminister` ()  BEGIN
     
     SET @suministerWeek = @inventoryValue/@averageSellsWeek; 
     
-    SELECT 
+    /*SELECT 
     	@suministerWeek AS weekSuminister,
         @inventoryValue AS inventoryValue,
         @averageSellsWeek AS averageWeek;
+     */
 
 END$$
 

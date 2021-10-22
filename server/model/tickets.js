@@ -10,7 +10,7 @@ class Tickets {
 
     async GestionStatics(request, response) {
         await db.query(`
-        CALL sp_GetManageStatics();
+        CALL sp_GetManageStaticsV2();
         `,(error,result,columns)=>{
             if (error) {
                 console.log(error);
@@ -19,18 +19,24 @@ class Tickets {
                     error
                 });
             }
-            
+                        
+            const statics = JSON.parse(result[0][0]['result']);
+            console.log(statics);
+
+
             return response.status(200).json({
                 status:200,
-                statics:{
-                    ticketAverage:result[0][0],
-                    yearSolds:result[1][0],
-                    inventoryValue:result[2][0],
-                    rotation:result[1][0]['totalInventory'] / result[2][0]['inventoryValue'],
-                    weekSolds:result[2][0]['inventoryValue'] / result[3][0]['weekInventory'] * 52,
-                    daySolds:result[2][0]['inventoryValue'] / result[4][0]['daySolds'] * 365
+                statics
+                // statics:{
+                //     data:result
+                //     // ticketAverage:result[0][0],
+                //     // yearSolds:result[1][0],
+                //     // inventoryValue:result[2][0],
+                //     // rotation:result[1][0]['totalInventory'] / result[2][0]['inventoryValue'],
+                //     // weekSolds:result[2][0]['inventoryValue'] / result[3][0]['weekInventory'] * 52,
+                //     // daySolds:result[2][0]['inventoryValue'] / result[4][0]['daySolds'] * 365
                     
-                }
+                // }
             });
         });
 
