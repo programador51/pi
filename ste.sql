@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-10-2021 a las 06:34:09
+-- Tiempo de generación: 22-10-2021 a las 04:58:36
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -179,6 +179,19 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDayInventory` ()  BEGIN
 
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDaySuminister` ()  BEGIN
+    CALL sp_GetInventoryValueV2();
+    
+    CALL sp_GetSellDaysAverage();
+    
+    SET @suministerDay = @inventoryValue/@averageSellsDay;       
+   
+   	SELECT 
+    	@suministerDay AS daySuminister,
+        @inventoryValue AS inventoryValue,
+        @averageSellsDay AS averageDay;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryAvailable` ()  BEGIN
 
 SELECT 
@@ -206,6 +219,15 @@ BEGIN
     SUM(inventario.stock*inventario.precioCompra) AS inventoryValue
     
     FROM inventario WHERE inventario.stock > 0;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryValueV2` ()  BEGIN
+
+	SET @inventoryValue = (SELECT 
+    SUM(inventario.stock*inventario.precioCompra) AS inventoryValue
+    
+    FROM inventario WHERE inventario.stock > 0);
 
 END$$
 
@@ -252,6 +274,63 @@ SELECT
                 reparacion_estatus.descripcion AS description
 
             FROM reparacion_estatus ORDER BY description ASC;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetSellDaysAverage` ()  BEGIN
+
+SET @today = (SELECT NOW());
+
+SET @actualDay = (SELECT DAYOFMONTH(@today));
+SET @actualMonth = (SELECT MONTH(@today));
+SET @actualYear = (SELECT YEAR(@today));
+
+SET @averageSellsDay = (SELECT SUM(precio) FROM movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND nombre LIKE '%accesorios%');
+
+SET @averageSellsDay = @averageSellsDay * 10;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetSellWeekAverage` ()  BEGIN
+
+/* https://dba.stackexchange.com/questions/15742/sql-query-to-get-last-day-of-every-week */
+SET
+    @lastDayWeek =(
+    SELECT
+        DATE(
+            NOW() + INTERVAL(6 - WEEKDAY(NOW())) DAY));
+            /* https://www.webstudying.net/notes/get-the-first-and-last-day-of-the-current-week-in-mysql/ */
+        SET
+            @firstDayWeek =(
+            SELECT
+                DATE_SUB(
+                    CURDATE(), INTERVAL WEEKDAY(CURDATE()) + 0 DAY));
+
+/* RANGE FOR THE START DATE */
+
+SET @actualDayStart = (SELECT DAYOFMONTH(@firstDayWeek));
+SET @actualMonthStart = (SELECT MONTH(@firstDayWeek));
+SET @actualYearStart = (SELECT YEAR(@firstDayWeek));
+
+/* RANGE FOR THE END DATE */
+
+SET @actualDayEnd = (SELECT DAYOFMONTH(@lastDayWeek));
+SET @actualMonthEnd = (SELECT MONTH(@lastDayWeek));
+SET @actualYearEnd = (SELECT YEAR(@lastDayWeek));
+
+SET @averageSellsWeek = (SELECT SUM(precio)
+FROM movimientos
+WHERE 
+    (diaMovimiento >= @actualDayStart AND 
+    diaMovimiento <= @actualDayEnd AND
+    mesMovimiento >= @actualMonthStart AND
+    mesMovimiento <= @actualMonthEnd AND
+    yearMovimiento >= @actualYearStart AND
+    yearMovimiento <= @actualYearEnd AND
+    nombre LIKE '%accesorios%'
+    ));
+    
+    SET @averageSellsWeek = @averageSellsWeek * 55;
 
 END$$
 
@@ -339,6 +418,21 @@ SET
                 WHERE
                     fecha BETWEEN @firstDayWeek AND @lastDayWeek;
                     
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetWeekSuminister` ()  BEGIN
+
+	CALL sp_GetInventoryValueV2();
+    
+    CALL sp_GetSellWeekAverage();
+    
+    SET @suministerWeek = @inventoryValue/@averageSellsWeek; 
+    
+    SELECT 
+    	@suministerWeek AS weekSuminister,
+        @inventoryValue AS inventoryValue,
+        @averageSellsWeek AS averageWeek;
+
 END$$
 
 DELIMITER ;
@@ -443,7 +537,8 @@ INSERT INTO `dinero` (`idEstadoCaja`, `montoInicial`, `montoFinal`, `dia`, `mes`
 (13, 350.01, 0, 3, 10, 2021),
 (14, 350.01, 0, 4, 10, 2021),
 (15, 350.01, 0, 9, 10, 2021),
-(16, 350.01, 0, 10, 10, 2021);
+(16, 350.01, 0, 10, 10, 2021),
+(17, 350.01, 0, 21, 10, 2021);
 
 -- --------------------------------------------------------
 
@@ -569,7 +664,9 @@ INSERT INTO `movimientos` (`idMovimiento`, `nombre`, `tipo`, `precio`, `idCorte`
 (17, 'Luz', 1, 499.99, 0, 18, 5, 2021),
 (19, 'Reparacion iphone', 0, 999.99, 0, 18, 5, 2021),
 (20, 'Test', 0, 1000, 0, 4, 10, 2021),
-(21, 'Test2', 1, 149.99, 0, 4, 10, 2021);
+(21, 'Test2', 1, 149.99, 0, 4, 10, 2021),
+(22, 'accesorios', 0, 499.99, 0, 21, 10, 2021),
+(23, 'Accesorios', 0, 199.99, 0, 21, 10, 2021);
 
 -- --------------------------------------------------------
 
@@ -939,7 +1036,7 @@ ALTER TABLE `contacto`
 -- AUTO_INCREMENT de la tabla `dinero`
 --
 ALTER TABLE `dinero`
-  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
@@ -975,7 +1072,7 @@ ALTER TABLE `inventario`
 -- AUTO_INCREMENT de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
-  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
