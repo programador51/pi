@@ -1,4 +1,5 @@
 const db = require('../config');
+const { parseJson } = require('../middlewares/database');
 
 class Tickets {
 
@@ -19,24 +20,12 @@ class Tickets {
                     error
                 });
             }
-                        
-            const statics = JSON.parse(result[0][0]['result']);
-            console.log(statics);
-
+            
+            const statics = parseJson(result[0][0]['result'],true);
 
             return response.status(200).json({
                 status:200,
                 statics
-                // statics:{
-                //     data:result
-                //     // ticketAverage:result[0][0],
-                //     // yearSolds:result[1][0],
-                //     // inventoryValue:result[2][0],
-                //     // rotation:result[1][0]['totalInventory'] / result[2][0]['inventoryValue'],
-                //     // weekSolds:result[2][0]['inventoryValue'] / result[3][0]['weekInventory'] * 52,
-                //     // daySolds:result[2][0]['inventoryValue'] / result[4][0]['daySolds'] * 365
-                    
-                // }
             });
         });
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-10-2021 a las 06:04:06
+-- Tiempo de generación: 22-10-2021 a las 19:22:59
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -122,7 +122,7 @@ SET
         SELECT
             DATE_FORMAT(NOW(), '%Y-01-01'));
         SET
-            @totalInventory =(
+            @anualInventorySold =(
             SELECT
                 SUM(total)
             FROM
@@ -131,9 +131,10 @@ SET
                 fecha BETWEEN @firstDay AND @lastDay
         );
         
-        SELECT 
+        
+        /**SELECT 
         	@totalInventory AS totalInventory,
-            CONCAT('$',FORMAT(@totalInventory,2)) AS formated;
+            CONCAT('$',FORMAT(@totalInventory,2)) AS formated;*/
             
             END$$
 
@@ -156,12 +157,14 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAverageTicket` ()  BEGIN
         WHERE
             ticket.diaRecoleccion = @actualDay);
 
-SET @average = @sumatory/@noTickets;
-
-SELECT
-	@average AS average,
-    CONCAT('$',FORMAT(@average,2)) AS formated;
-
+	SET @averageTicket = (@sumatory/@noTickets);
+	
+    SET @ticketSells = @sumatory;
+    
+    SET @averageTicket = (IFNULL(@averageTicket,0));
+    
+    SET @ticketSells = (IFNULL(@ticketSells,0));
+    
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDayInventory` ()  BEGIN
@@ -184,8 +187,11 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDaySuminister` ()  BEGIN
     
     CALL sp_GetSellDaysAverage();
     
-    SET @suministerDay = @inventoryValue/@averageSellsDay;       
-   
+    SET @suministerDay = @inventoryValue/@averageSellsDay;   
+    
+    	SET @suministerDay = (IFNULL(@suministerDay,0));
+   		
+        SET @averageSellsDay = (IFNULL(@averageSellsDay,0));
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryAvailable` ()  BEGIN
@@ -204,7 +210,9 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryRotation` ()  BEGIN
 
-	SELECT 499 AS 'pruebaRotacion';
+	CALL sp_GetAnualInventory(); 
+    
+    SET @rotationInventory = @anualInventorySold / @inventoryValue;
 
 END$$
 
@@ -248,14 +256,24 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStatics` ()  BEGIN
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStaticsV2` ()  BEGIN 
-
+	
+    CALL sp_GetAverageTicket();
+    
 	CALL sp_GetDaySuminister();
     
     CALL sp_GetWeekSuminister();
+    
+    CALL sp_GetInventoryRotation();
 
 /* GENERATE DE JSON OBJECT */
     SET @result = (SELECT 
 		JSON_OBJECT(
+            
+            'ticket',JSON_OBJECT(
+            'average',@averageTicket,
+            'sumatoryTickets',@ticketSells,
+            'noTickets',@noTickets
+            ),
         	'suministerDay', JSON_OBJECT(
             'average',@suministerDay,
             'averageSells',@averageSellsDay,
@@ -266,6 +284,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStaticsV2` ()  BEGIN
             'average',@suministerWeek,
             'averageSells',@averageSellsWeek,
             'inventoryValue',@inventoryValue
+            ),
+            'rotation',JSON_OBJECT(
+            'average',@rotationInventory
             )
         ) AS result);
  
@@ -451,11 +472,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetWeekSuminister` ()  BEGIN
     
     SET @suministerWeek = @inventoryValue/@averageSellsWeek; 
     
-    /*SELECT 
-    	@suministerWeek AS weekSuminister,
-        @inventoryValue AS inventoryValue,
-        @averageSellsWeek AS averageWeek;
-     */
+	SET @suministerWeek = (IFNULL(@suministerWeek,0));
+    
+    SET @averageSellsWeek = (IFNULL(@suministerWeek,0));
 
 END$$
 
@@ -562,7 +581,8 @@ INSERT INTO `dinero` (`idEstadoCaja`, `montoInicial`, `montoFinal`, `dia`, `mes`
 (14, 350.01, 0, 4, 10, 2021),
 (15, 350.01, 0, 9, 10, 2021),
 (16, 350.01, 0, 10, 10, 2021),
-(17, 350.01, 0, 21, 10, 2021);
+(17, 350.01, 0, 21, 10, 2021),
+(18, 350.01, 0, 22, 10, 2021);
 
 -- --------------------------------------------------------
 
@@ -857,7 +877,8 @@ INSERT INTO `ticket` (`idTicket`, `diaRecoleccion`, `mesRecoleccion`, `recolecti
 (101, 9, 10, 2021, 11, 10, 2021, 'M2', 'Xiaomi', 'Se descarga rapido', '2', 899, NULL, 1, 1299, 5, 2, NULL, 'Maria  Garza Del Angel', 8819648494987),
 (102, 9, 10, 2021, 17, 10, 2021, 'Iphone 13', 'Apple', 'Quiere un case', '1', 239, NULL, 1, 439, 3, 3, NULL, 'Maria  Santos Torres', 811868498414),
 (103, 10, 10, 2021, 12, 10, 2021, 'Redmi', 'Xiaomi', 'AAAA', '5', 455, NULL, 2, 790, 5, 1, NULL, 'Sandra  Chacon Olivarez', 81654894834),
-(104, 10, 10, 2021, 14, 10, 2021, '10', 'Iphone', 'BBBBB', '4', 689, NULL, 1, 1000, 5, 2, NULL, 'Mario  Leal Cardenas', 8184898494);
+(104, 10, 10, 2021, 14, 10, 2021, '10', 'Iphone', 'BBBBB', '4', 689, NULL, 1, 1000, 5, 2, NULL, 'Mario  Leal Cardenas', 8184898494),
+(105, 22, 10, 2021, 27, 10, 2021, 'Mia2lite', 'Xiaomi', 'a', '4', 499, NULL, 1, 679, 3, 2, NULL, 'Juana  Del arco Real', 81189484848);
 
 -- --------------------------------------------------------
 
@@ -1060,7 +1081,7 @@ ALTER TABLE `contacto`
 -- AUTO_INCREMENT de la tabla `dinero`
 --
 ALTER TABLE `dinero`
-  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
@@ -1132,7 +1153,7 @@ ALTER TABLE `sucursales`
 -- AUTO_INCREMENT de la tabla `ticket`
 --
 ALTER TABLE `ticket`
-  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
 
 --
 -- AUTO_INCREMENT de la tabla `ticketestados`
