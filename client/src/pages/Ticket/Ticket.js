@@ -242,11 +242,16 @@ export function Ticket() {
             />
           </div>
 
-          <input
-            type="submit"
-            className="save customBtn"
-            value="Actualizar estado"
-          />
+          {ticket.idRepairStatus === 2 ? null :
+
+            <input
+              type="submit"
+              className="save customBtn"
+              value="Actualizar estado"
+            />
+
+          }
+
         </ContainerTicket>
       ) : null}
     </>

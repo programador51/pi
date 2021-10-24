@@ -8,8 +8,6 @@ export default function useTicket(){
 
     async function updateTicket(data){
 
-        // console.log(data);
-
         const wasUpdate = await UpdateTicket(data);
         if(wasUpdate){
             querySuccess('Ticket actualizado',()=>{

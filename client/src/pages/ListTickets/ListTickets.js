@@ -69,7 +69,9 @@ export default function ListTickets() {
         {row !== null ? (
           <div className="edit">
             <Link to={`./ver/${row.id}`}>
-                <button className=" px-4 customBtn">Ver/Editar</button>
+                <button className=" px-4 customBtn">
+                  {row.reparation.id===2 ? 'Ver' : 'Ver/Editar'}
+                </button>
             </Link>
           </div>
         ) : null}

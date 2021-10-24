@@ -1,5 +1,5 @@
 const db = require('../config');
-const { parseJson } = require('../middlewares/database');
+const { parseJson, parseRowsJson } = require('../middlewares/database');
 
 class Tickets {
 
@@ -12,7 +12,7 @@ class Tickets {
     async GestionStatics(request, response) {
         await db.query(`
         CALL sp_GetManageStaticsV2();
-        `,(error,result,columns)=>{
+        `, (error, result, columns) => {
             if (error) {
                 console.log(error);
                 return response.status(200).json({
@@ -20,11 +20,11 @@ class Tickets {
                     error
                 });
             }
-            
-            const statics = parseJson(result[0][0]['result'],true);
+
+            const statics = parseJson(result[0][0]['result'], true);
 
             return response.status(200).json({
-                status:200,
+                status: 200,
                 statics
             });
         });
@@ -292,26 +292,55 @@ class Tickets {
 
     async UpdateTicket(request, response, next) {
 
-        console.log(request.body)
+        const { repairStatus, idTicket } = request.body;
+
+        // const successQuery = response.status(200).json({
+        //     status: 200,
+        //     message: 'Ticket actualizado'
+        // });
+
+        // const errorQuery = response.status(200).json({
+        //     status: 200,
+        //     error: 'Error al actualizar ticket'
+        // });
 
         await db.query(`
         
         UPDATE ticket SET estadoReparacion = ? WHERE idTicket = ?
         
         `,
-            [request.body.repairStatus, request.body.idTicket],
-            (error, results, columns) => {
-                if (error) {
+            [repairStatus, idTicket],
+            async(error, results, columns) => {
+
+                
+
+                if (error){
                     return response.status(200).json({
-                        status: 400,
-                        error
+                        status: 200,
+                        error: 'Error al actualizar ticket'
                     });
                 }
 
-                return response.status(200).json({
-                    status: 200,
-                    message: 'Ticket actualizado'
-                });
+                if (repairStatus === 2) {
+
+                    await db.query(`
+                        CALL sp_AddTicketMove(?)
+                    `, idTicket,
+                        (error, result, fields) => {
+                            if (error) return errorQuery;
+
+                            return response.status(200).json({
+                                status: 200,
+                                message: 'Ticket actualizado'
+                            });
+                        });
+
+                } else {
+                    return response.status(200).json({
+                        status: 200,
+                        message: 'Ticket actualizado'
+                    });
+                }
             }
         )
     }
@@ -352,6 +381,9 @@ class Tickets {
             ],
             (error, result, columns) => {
                 if (error) {
+
+                    console.log(error);
+
                     return response.status(200).json({
                         status: 400,
                         error
@@ -363,7 +395,7 @@ class Tickets {
                     data: {
                         pages: +(request.params.pages),
                         actualPage: +(request.query.pagina),
-                        tickets: result[0]
+                        tickets: parseRowsJson(result[0], 'ticket')
                     }
                 });
             }

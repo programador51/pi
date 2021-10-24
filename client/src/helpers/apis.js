@@ -175,6 +175,8 @@ export async function fetchManage(day, month, year) {
     try {
         const { data } = await axios.get(`${URL_API}movimientos/${day}/${month}/${year}`);
 
+        console.log(data);
+
         if (data.status === 200) {
             return [data.moves, data.cashRegisterDay[0].montoInicial];
 
