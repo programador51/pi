@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-10-2021 a las 19:22:59
+-- Tiempo de generación: 25-10-2021 a las 00:38:52
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -52,6 +52,21 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddRequestMovement` (IN `apiTecn
              @today
          );
          
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddTicketMove` (IN `apiIdTicket` INT)  BEGIN
+
+SET @description = (SELECT CONCAT(marca,' - ',modelo) FROM ticket WHERE idTicket = apiIdTicket);
+SET @amount = (SELECT totalPago FROM ticket WHERE idTicket = apiIdTicket);
+
+SET @actualDay = ( SELECT NOW());
+
+INSERT INTO movimientos (nombre,tipo,precio,idCorte,diaMovimiento,mesMovimiento,yearMovimiento)
+
+VALUES
+
+(@description,0,@amount,0,DAY(@actualDay),MONTH(@actualDay),YEAR(@actualDay));
+
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_CreateTicket` (IN `apiDiaRecoleccion` INT, IN `apiMesRecoleccion` INT, IN `apiRecolectionYear` INT, IN `apiDiaEntrega` INT, IN `apiMesEntrega` INT, IN `apiEntregaYear` INT, IN `apiModelo` VARCHAR(30) CHARSET utf8, IN `apiMarca` VARCHAR(30) CHARSET utf8, IN `apiDescripcion` VARCHAR(50) CHARSET utf8, IN `apiServicio` VARCHAR(50) CHARSET utf8, IN `apiCotizacion` FLOAT, IN `apiMedioPagoId` INT, IN `apiTotalPago` FLOAT, IN `apiTecnico` INT, IN `apiEstadoReparacion` INT, IN `apiNombreCliente` VARCHAR(50) CHARSET utf8, IN `apiNumeroCliente` BIGINT)  BEGIN
@@ -108,7 +123,19 @@ VALUES
          	apiNombreCliente,
          	apiNumeroCliente
         );
+        
+        SELECT LAST_INSERT_ID() AS idTicketCreated;
 
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAmount` ()  BEGIN 
+CALL sp_GetCurrentAmount();
+CALL sp_GetLastCurrentAmount();
+
+SELECT 
+	IFNULL(@currentAmounth,0) AS currentAmount,
+    IF(ISNULL(@currentAmount),1,0) AS createAmount;
+    
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAnualInventory` ()  BEGIN
@@ -165,6 +192,18 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetAverageTicket` ()  BEGIN
     
     SET @ticketSells = (IFNULL(@ticketSells,0));
     
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetCurrentAmount` ()  BEGIN
+
+SET @actualDay = ( SELECT NOW());
+    
+SET @currentAmounth = (SELECT 
+	montoInicial AS currentAmounth FROM dinero WHERE 
+    	dia = DAY(@actualDay) AND
+        mes = MONTH(@actualDay) AND
+        yearTime = YEAR(@actualDay));
+        
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDayInventory` ()  BEGIN
@@ -232,6 +271,12 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetInventoryValueV2` ()  BEGIN
     SUM(inventario.stock*inventario.precioCompra) AS inventoryValue
     
     FROM inventario WHERE inventario.stock > 0);
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetLastCurrentAmount` ()  BEGIN
+
+SET @lastCurrenAmount = (SELECT montoInicial FROM dinero ORDER BY idEstadoCaja DESC LIMIT 1);
 
 END$$
 
@@ -405,19 +450,43 @@ END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetTickets` (IN `apiIdTecnico` INT, IN `apiInicio` INT, IN `apiLimite` INT)  BEGIN
 
-SELECT 
+SELECT
+    JSON_OBJECT(
+        'id',ticket.idTicket,
+        'recolection',CONCAT(ticket.diaRecoleccion,'/',ticket.mesRecoleccion,'/',ticket.recolectionYear),
+        'deliver',CONCAT(ticket.diaEntrega,'/',ticket.mesEntrega,'/',ticket.entregaYear),
+        'model',ticket.modelo,
+        'reparation',JSON_OBJECT(
+            'id',reparacion_estatus.id,
+            'description',reparacion_estatus.descripcion
+        ),
+        'status',reparacion_estatus.descripcion
 
-	ticket.idTicket AS id,
+    ) AS ticket
+    
+	FROM ticket 
+
+	INNER JOIN reparacion_estatus ON ticket.estadoReparacion  = reparacion_estatus.id 
+
+	WHERE tecnico = apiIdTecnico ORDER BY ticket.idTicket DESC LIMIT apiInicio,apiLimite;
+
+/*SELECT
+
+    ticket.idTicket AS id,
     CONCAT(ticket.diaRecoleccion,'/',ticket.mesRecoleccion,'/',ticket.recolectionYear) AS recolection,
     CONCAT(ticket.diaEntrega,'/',ticket.mesEntrega,'/',ticket.entregaYear) AS deliver,
     ticket.modelo AS model,
+    JSON_OBJECT(
+        'id',reparacion_estatus.id,
+        'descripcion',reparacion_estatus.descripcion
+    )AS reparacion,
     reparacion_estatus.descripcion AS status
+    
+	FROM ticket 
 
-FROM ticket 
+	INNER JOIN reparacion_estatus ON ticket.estadoReparacion  = reparacion_estatus.id 
 
-INNER JOIN reparacion_estatus ON ticket.estadoReparacion  = reparacion_estatus.id 
-
-WHERE tecnico = apiIdTecnico ORDER BY ticket.idTicket DESC LIMIT apiInicio,apiLimite;
+	WHERE tecnico = apiIdTecnico ORDER BY ticket.idTicket DESC LIMIT apiInicio,apiLimite;*/
 
 END$$
 
@@ -582,7 +651,8 @@ INSERT INTO `dinero` (`idEstadoCaja`, `montoInicial`, `montoFinal`, `dia`, `mes`
 (15, 350.01, 0, 9, 10, 2021),
 (16, 350.01, 0, 10, 10, 2021),
 (17, 350.01, 0, 21, 10, 2021),
-(18, 350.01, 0, 22, 10, 2021);
+(18, 350.01, 0, 22, 10, 2021),
+(19, 350.01, 0, 24, 10, 2021);
 
 -- --------------------------------------------------------
 
@@ -710,7 +780,12 @@ INSERT INTO `movimientos` (`idMovimiento`, `nombre`, `tipo`, `precio`, `idCorte`
 (20, 'Test', 0, 1000, 0, 4, 10, 2021),
 (21, 'Test2', 1, 149.99, 0, 4, 10, 2021),
 (22, 'accesorios', 0, 499.99, 0, 21, 10, 2021),
-(23, 'Accesorios', 0, 199.99, 0, 21, 10, 2021);
+(23, 'Accesorios', 0, 199.99, 0, 21, 10, 2021),
+(24, '1', 1, 1, 0, 24, 10, 2021),
+(25, 'dasdas - dadas', 0, 12, 0, 24, 10, 2021),
+(26, 'Nokia - Lumia', 0, 200, 0, 24, 10, 2021),
+(27, 'Xiaomi - Galaxy', 0, 499, 0, 24, 10, 2021),
+(28, 'Xiaomi - Galaxy', 0, 300, 0, 24, 10, 2021);
 
 -- --------------------------------------------------------
 
@@ -766,6 +841,26 @@ INSERT INTO `reparacion_estatus` (`id`, `descripcion`) VALUES
 (1, 'En reparacion'),
 (2, 'Reparado'),
 (3, 'No reparado');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rols`
+--
+
+CREATE TABLE `rols` (
+  `id` int(11) NOT NULL,
+  `descripcion` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `rols`
+--
+
+INSERT INTO `rols` (`id`, `descripcion`) VALUES
+(1, 'PC'),
+(2, 'Movil'),
+(3, 'Super Admin');
 
 -- --------------------------------------------------------
 
@@ -878,7 +973,23 @@ INSERT INTO `ticket` (`idTicket`, `diaRecoleccion`, `mesRecoleccion`, `recolecti
 (102, 9, 10, 2021, 17, 10, 2021, 'Iphone 13', 'Apple', 'Quiere un case', '1', 239, NULL, 1, 439, 3, 3, NULL, 'Maria  Santos Torres', 811868498414),
 (103, 10, 10, 2021, 12, 10, 2021, 'Redmi', 'Xiaomi', 'AAAA', '5', 455, NULL, 2, 790, 5, 1, NULL, 'Sandra  Chacon Olivarez', 81654894834),
 (104, 10, 10, 2021, 14, 10, 2021, '10', 'Iphone', 'BBBBB', '4', 689, NULL, 1, 1000, 5, 2, NULL, 'Mario  Leal Cardenas', 8184898494),
-(105, 22, 10, 2021, 27, 10, 2021, 'Mia2lite', 'Xiaomi', 'a', '4', 499, NULL, 1, 679, 3, 2, NULL, 'Juana  Del arco Real', 81189484848);
+(105, 22, 10, 2021, 27, 10, 2021, 'Mia2lite', 'Xiaomi', 'a', '4', 499, NULL, 1, 679, 3, 2, NULL, 'Juana  Del arco Real', 81189484848),
+(106, 24, 10, 2021, 26, 10, 2021, 'dadas', 'dasdas', 'adasda', '5', 12, NULL, 1, 12, 3, 2, NULL, 'aaa aaa aa aa', 31231231232),
+(107, 24, 10, 2021, 27, 10, 2021, 'Lumia', 'Nokia', 'adasdas', '5', 100, NULL, 1, 200, 3, 2, NULL, 'adas dasdas dasdas dasdas', 3112321312),
+(108, 24, 10, 2021, 26, 10, 2021, 'Mia2lite', 'Xiaomi', 'dasdasdas', '2', 100, NULL, 2, 150, 3, 1, NULL, 'fdsfsdfsdfsd fsdfsdfsd fsdfsdfsd fsdfsd', 123213123123),
+(109, 24, 10, 2021, 27, 10, 2021, 'Galaxy', 'Xiaomi', 'adasd', '4', 12, NULL, 1, 20, 3, 3, NULL, 'dsfsdfs fsdfsdfsd sfsdfsdf fsdfdssd', 321312321342),
+(110, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(111, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(112, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(113, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(114, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(115, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(116, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(117, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(118, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(119, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
+(120, 24, 10, 2021, 28, 10, 2021, 'Galaxy', 'Xiaomi', '', '4', 399, NULL, 1, 499, 3, 2, NULL, 'Mario  Bros Perez', 45148488484),
+(121, 24, 10, 2021, 24, 10, 2021, 'Galaxy', 'Xiaomi', '', '4', 250, NULL, 1, 300, 3, 2, NULL, 'Luigi  Bros Perez', 51548484949);
 
 -- --------------------------------------------------------
 
@@ -1020,6 +1131,12 @@ ALTER TABLE `reparacion_estatus`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indices de la tabla `rols`
+--
+ALTER TABLE `rols`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `rotation`
 --
 ALTER TABLE `rotation`
@@ -1081,7 +1198,7 @@ ALTER TABLE `contacto`
 -- AUTO_INCREMENT de la tabla `dinero`
 --
 ALTER TABLE `dinero`
-  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
@@ -1117,7 +1234,7 @@ ALTER TABLE `inventario`
 -- AUTO_INCREMENT de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
-  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
@@ -1129,6 +1246,12 @@ ALTER TABLE `pedidos`
 -- AUTO_INCREMENT de la tabla `reparacion_estatus`
 --
 ALTER TABLE `reparacion_estatus`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `rols`
+--
+ALTER TABLE `rols`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
@@ -1153,7 +1276,7 @@ ALTER TABLE `sucursales`
 -- AUTO_INCREMENT de la tabla `ticket`
 --
 ALTER TABLE `ticket`
-  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT de la tabla `ticketestados`

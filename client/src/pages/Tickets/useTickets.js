@@ -11,6 +11,7 @@ export default function useTickets(){
         parseDates();
         parseName();
 
+        console.log(data);
         const wasAdded = await AddTicket(data);
 
         if(wasAdded){

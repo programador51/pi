@@ -5,7 +5,7 @@ const ContainerManage = styled.div`
     background-size: 25%;
     margin:0 0 0 10%;
     padding:3vh;
-    height: 100vh;
+    min-height: 100vh;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 80% 20%;
