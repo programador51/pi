@@ -3,6 +3,8 @@
 1. [Requisitos para iniciar el codigo](#requirements)
 2. [Descargar el codigo](#download)
 3. [Iniciar la base de datos](#db)
+4. [Iniciar servidor](#server)
+5. [Iniciar client](#client)
 
 # ¿ Como iniciar el proyecto (local) ?
 
@@ -38,10 +40,14 @@ Debe dar como resultado la siguiente estructura de carpetas, `client` y `server`
 1. Ejecutar Apache y MySQL con XAMPP.
 2. Abrir el gestor de base de datos `MySQL` e importar la base de datos. **Se debe llamar `pi_ste`.** El archivo se encuentra en la raiz de este repositorio y se llama `pi_ste.sql`.
 
+<span id="server"></span>
+
 ## Iniciar el servidor
 
 1. Abrir la carpeta `server` de este repositorio en la terminal del S.O.
 2. Ejectuar el comando `npm run server`
+
+<span id="client"></span>
 
 ## Iniciar el cliente
 
