@@ -98,7 +98,7 @@ class Tickets {
             service, quotation, payMethods, total,
             idUser, repairStatus, customerFullName, customerPhone
         ],
-            async(error, result, columns) => {
+            async (error, result, columns) => {
                 if (error) {
                     console.log(error);
                     return response.status(400).json({
@@ -108,24 +108,20 @@ class Tickets {
                 }
 
                 const idTicket = result[0][0]['idTicketCreated'];
+                request.body.ticketId = idTicket
 
-                if(repairStatus===2){
+                if (repairStatus === 2) {
                     await db.query(`
                     CALL sp_AddTicketMove(?)
                     `, idTicket,
                         (error, result, fields) => {
                             if (error) return errorQuery;
 
-                            return response.status(200).json({
-                                status: 200,
-                                message: 'Ticket e ingreso agregado'
-                            });
+                            next();
+
                         });
-                }else{
-                    return response.status(200).json({
-                        status: 200,
-                        message: 'Ticket agregado'
-                    });
+                } else {
+                    next()
                 }
 
             });
@@ -215,27 +211,29 @@ class Tickets {
         });
     }
 
-    async saveStatesTicket(request, response, next) {
+    async saveStatesTicket(request, response) {
 
-        const { equipmentState, ticketId } = request.body;
+        const { status: statusEquip, ticketId } = request.body;
 
-        await request.body.equipmentState.map(async (status) => {
-            await db.query(`INSERT INTO ticketestados values
+        const statusQuerys = statusEquip.map(status => new Promise((resolve, reject) => {
+            db.query(`INSERT INTO ticketestados values
             (?,?,?,?)
-            `, [null, status.idEstadoTicketNombre, ticketId, status.estado],
+            `, [null, status.value, ticketId, status.isChecked ? 1 : 0],
                 (error, result, columns) => {
                     if (error) {
-                        return response.json({
-                            status: 500,
-                            error
-                        });
+                        reject(error);
                     }
+
+                    resolve('OK');
                 })
-        });
+        }));
+
+        await Promise.all(statusQuerys);
 
         return response.json({
             status: 200,
-            message: `Ticket creado`
+            message: `Ticket creado`,
+            ticketId
         });
 
     }
@@ -317,11 +315,11 @@ class Tickets {
         
         `,
             [repairStatus, idTicket],
-            async(error, results, columns) => {
+            async (error, results, columns) => {
 
-                
 
-                if (error){
+
+                if (error) {
                     return response.status(200).json({
                         status: 200,
                         error: 'Error al actualizar ticket'
@@ -370,7 +368,8 @@ class Tickets {
                     status: 200,
                     ticket: {
                         ...ticket,
-                        customer: JSON.parse(ticket.customer)
+                        customer: JSON.parse(ticket.customer),
+                        status: results[1]
                     }
                 });
             }

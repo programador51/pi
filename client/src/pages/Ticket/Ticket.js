@@ -178,22 +178,22 @@ export function Ticket() {
 
               <div className="status">
                 <p>Estado del equipo</p>
-                <div className="listStatus">
+                <div id="listStatus" className="listStatus">
                   <div>
-                    <input type="checkbox" />
-                    <label htmlFor="">Apagado</label>
+                    <input checked={ticket.status[0].value} value="1" id="off" name="off" type="checkbox" />
+                    <label htmlFor="off">Apagado</label>
                   </div>
                   <div>
-                    <input type="checkbox" />
-                    <label htmlFor="">Chip</label>
+                    <input checked={ticket.status[1].value} value="2" id="chip" name="chip" type="checkbox" />
+                    <label htmlFor="chip">Chip</label>
                   </div>
                   <div>
-                    <input type="checkbox" />
-                    <label htmlFor="">Encendido</label>
+                    <input checked={ticket.status[2].value} value="3" id="on" name="on" type="checkbox" />
+                    <label htmlFor="on">Encendido</label>
                   </div>
                   <div>
-                    <input type="checkbox" />
-                    <label htmlFor="">Sim</label>
+                    <input checked={ticket.status[3].value} value="4" id="sim" name="sim" type="checkbox" />
+                    <label htmlFor="sim">Sim</label>
                   </div>
                 </div>
               </div>

@@ -8,12 +8,12 @@ import { queryError, querySuccess } from '../helpers/alerts';
  * @param {object} item - Information of the item requested
  * @returns {boolean} True if query success
  */
-export async function UpdateRequestItem(item){
+export async function UpdateRequestItem(item) {
     try {
-        
-        const { data } = await axios.post(`${URL_API}inventario/solicitar`,item);
 
-        if(data.status===200) return true;
+        const { data } = await axios.post(`${URL_API}inventario/solicitar`, item);
+
+        if (data.status === 200) return true;
 
         return false;
 
@@ -22,12 +22,12 @@ export async function UpdateRequestItem(item){
     }
 }
 
-export async function GetManageStatics(){
+export async function GetManageStatics() {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}ticket/gestion/estatus`);
 
-        if(data.status===200) return data.statics;
+        if (data.status === 200) return data.statics;
 
         return null;
 
@@ -38,12 +38,12 @@ export async function GetManageStatics(){
     }
 }
 
-export async function GetAvailableInventory(){
+export async function GetAvailableInventory() {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}inventario/disponible`);
 
-        if(data.status===200) return data.inventory;
+        if (data.status === 200) return data.inventory;
 
         return [];
 
@@ -52,12 +52,12 @@ export async function GetAvailableInventory(){
     }
 }
 
-export async function UpdateTicket(dataForm){
+export async function UpdateTicket(dataForm) {
     try {
-        
-        const { data } = await axios.put(`${URL_API}ticket`,dataForm);
 
-        if(data.status===200){
+        const { data } = await axios.put(`${URL_API}ticket`, dataForm);
+
+        if (data.status === 200) {
 
             return true;
         }
@@ -70,19 +70,19 @@ export async function UpdateTicket(dataForm){
     }
 }
 
-export async function GetTickets(page = 1,order = 'DESC',columnOrdering = 'na',aditionalQuery){
+export async function GetTickets(page = 1, order = 'DESC', columnOrdering = 'na', aditionalQuery) {
 
     const errorQuery = {
-        pages:0,
-        actualPage:0,
-        tickets:[]
-    }   
+        pages: 0,
+        actualPage: 0,
+        tickets: []
+    }
 
     try {
-        
+
         const { data } = await axios.get(`${URL_API}ticket/tickets?pagina=${page}${aditionalQuery}`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.data;
         }
 
@@ -101,14 +101,14 @@ export async function GetTickets(page = 1,order = 'DESC',columnOrdering = 'na',a
  * @param {object} ticketInfo - Ticket info
  * @returns {boolean} True if ticket was created
  */
-export async function AddTicket(ticketInfo){
+export async function AddTicket(ticketInfo) {
     try {
-        
-        const { data } = await axios.post(`${URL_API}ticket/crear`,ticketInfo);
 
-        if(data.status===200){
+        const { data } = await axios.post(`${URL_API}ticket/crear`, ticketInfo);
+
+        if (data.status === 200) {
             return true;
-        }else{
+        } else {
             return false;
         }
 
@@ -118,14 +118,14 @@ export async function AddTicket(ticketInfo){
     }
 }
 
-export async function GetPayMethods(){
+export async function GetPayMethods() {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}ticket/metodos-pago`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.payMethods
-        }else{
+        } else {
             return [];
         }
 
@@ -135,14 +135,14 @@ export async function GetPayMethods(){
     }
 }
 
-export async function GetRepairStatus(){
+export async function GetRepairStatus() {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}ticket/reparacion/estatus`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.repairStatus
-        }else{
+        } else {
             return [];
         }
 
@@ -152,14 +152,14 @@ export async function GetRepairStatus(){
     }
 }
 
-export async function GetServices(){
+export async function GetServices() {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}servicios`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.services;
-        }else{
+        } else {
             return [];
         }
 
@@ -313,7 +313,7 @@ export async function addProduct() {
     const sell = document.getElementById('addProductSell').value;
 
     try {
-        const { data } = await axios.post(`${URL_API}inventario/agregar/producto`,{
+        const { data } = await axios.post(`${URL_API}inventario/agregar/producto`, {
             description,
             category,
             stock,
@@ -321,11 +321,11 @@ export async function addProduct() {
             sell
         });
 
-        if(data.status==200){
+        if (data.status == 200) {
             querySuccess(data.message);
             return true;
         }
-        
+
         return false;
 
     } catch (error) {
@@ -333,16 +333,16 @@ export async function addProduct() {
     }
 }
 
-export async function addCategory(){
+export async function addCategory() {
     try {
 
         const category = document.getElementById('addCategory').value;
 
-        const { data } = await axios.post(`${URL_API}inventario/agregar/categoria`,{
+        const { data } = await axios.post(`${URL_API}inventario/agregar/categoria`, {
             category
         });
 
-        if(data.status===200){
+        if (data.status === 200) {
             return true;
         }
 
@@ -353,7 +353,7 @@ export async function addCategory(){
 }
 
 // LOGIN
-export async function login(e){
+export async function login(e) {
 
     e.preventDefault();
 
@@ -361,29 +361,29 @@ export async function login(e){
     const password = document.getElementById('password').value;
 
     try {
-        const { data } = await axios.post(`${URL_API}usuarios/login`,{
+        const { data } = await axios.post(`${URL_API}usuarios/login`, {
             userName,
             password
         });
-    
-        if(data.status===200){
+
+        if (data.status === 200) {
 
             let redirect = ``;
 
-            if(data.user.rol === 1 || data.user.rol === 3){
+            if (data.user.rol === 1 || data.user.rol === 3) {
                 redirect = '/gestion';
-            }else{
+            } else {
                 redirect = '/despacho';
             }
 
-            localStorage.setItem('userInfo',JSON.stringify(data.user));
-            
-            return [true,redirect];
+            localStorage.setItem('userInfo', JSON.stringify(data.user));
+
+            return [true, redirect];
         }
-    
+
         queryError(`Usuario o credenciales incorrectas`);
 
-        return [false,''];
+        return [false, ''];
 
     } catch (error) {
         console.log(error);
@@ -391,7 +391,7 @@ export async function login(e){
 }
 
 // REFACTIONS
-export async function addRefaction(){
+export async function addRefaction() {
     try {
 
         const quantity = document.getElementById('quantity').value;
@@ -402,23 +402,23 @@ export async function addRefaction(){
         const today = getActualDate();
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-        const { data } = await axios.post(`${URL_API}refacciones/agregar`,{
+        const { data } = await axios.post(`${URL_API}refacciones/agregar`, {
             quantity,
             refaction,
             fabricant,
             model,
-            day:today.numberDate.day,
-            month:today.numberDate.month+1,
-            year:today.numberDate.year,
-            rol:userInfo.rol,
-            sucursal:userInfo.sucursal
+            day: today.numberDate.day,
+            month: today.numberDate.month + 1,
+            year: today.numberDate.year,
+            rol: userInfo.rol,
+            sucursal: userInfo.sucursal
         }
-            
+
         );
 
         console.log(data);
 
-        if(data.status===200){
+        if (data.status === 200) {
             querySuccess(data.message);
             document.getElementById('closeAddProduct').click();
             document.getElementById('addProductForm').reset();
@@ -432,19 +432,19 @@ export async function addRefaction(){
     }
 }
 
-export async function getRefactions(){
+export async function getRefactions() {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     const today = getActualDate();
 
     try {
         // refacciones/sucursal/dia/mes/año
-        const { data } = await axios.get(`${URL_API}refacciones/${userInfo.sucursal}/${today.numberDate.day}/${today.numberDate.month+1}/${today.numberDate.year}`);
+        const { data } = await axios.get(`${URL_API}refacciones/${userInfo.sucursal}/${today.numberDate.day}/${today.numberDate.month + 1}/${today.numberDate.year}`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             console.log('Refactions obtained');
             return data.refactions;
         }
-        
+
         queryError(data.error);
 
     } catch (error) {
@@ -452,17 +452,17 @@ export async function getRefactions(){
     }
 }
 
-export async function executeDeleteRefaction(id){
+export async function executeDeleteRefaction(id) {
     try {
 
         document.getElementById('optionsRefactions').classList.add('d-none');
 
 
-        const { data } = await axios.post(`${URL_API}refacciones/borrar`,{
+        const { data } = await axios.post(`${URL_API}refacciones/borrar`, {
             id
         });
 
-        if(data.status===200){
+        if (data.status === 200) {
             querySuccess(data.message);
             document.getElementById(id).innerHTML = ``;
             return;
@@ -474,18 +474,18 @@ export async function executeDeleteRefaction(id){
     }
 }
 
-export async function editRefaction(id){
+export async function editRefaction(id) {
     try {
         const quantity = document.getElementById('editQuantity').value;
         const refaction = document.getElementById('editRefaction').value;
         const fabricant = document.getElementById('editFabricant').value;
         const model = document.getElementById('editModel').value;
-        
+
 
         document.getElementById('closeAddProduct').click();
         document.getElementById('optionsRefactions').classList.add('d-none');
 
-        const { data } = await axios.post(`${URL_API}refacciones/editar`,{
+        const { data } = await axios.post(`${URL_API}refacciones/editar`, {
             quantity,
             refaction,
             fabricant,
@@ -493,7 +493,7 @@ export async function editRefaction(id){
             id
         });
 
-        if(data.status===200){
+        if (data.status === 200) {
             querySuccess(data.message);
             return true;
         }
@@ -505,19 +505,19 @@ export async function editRefaction(id){
     }
 }
 
-export async function refactionsOffice(office){
+export async function refactionsOffice(office) {
 
     const today = getActualDate();
 
     try {
         // refacciones/sucursal/dia/mes/año
-        const { data } = await axios.get(`${URL_API}refacciones/${office}/${today.numberDate.day}/${today.numberDate.month+1}/${today.numberDate.year}`);
+        const { data } = await axios.get(`${URL_API}refacciones/${office}/${today.numberDate.day}/${today.numberDate.month + 1}/${today.numberDate.year}`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             console.log('Refactions obtained');
             return data.refactions;
         }
-        
+
         queryError(data.error);
 
     } catch (error) {
@@ -525,18 +525,18 @@ export async function refactionsOffice(office){
     }
 }
 
-export async function confirmDispatchRefaction(id){
+export async function confirmDispatchRefaction(id) {
     try {
         // refacciones/despachar
-        const { data } = await axios.post(`${URL_API}refacciones/despachar`,{
+        const { data } = await axios.post(`${URL_API}refacciones/despachar`, {
             id
         });
 
-        if(data.status===200){
+        if (data.status === 200) {
             querySuccess(data.message);
             return true;
         }
-        
+
         queryError(data.error);
 
     } catch (error) {
@@ -544,14 +544,14 @@ export async function confirmDispatchRefaction(id){
     }
 }
 
-export async function getMovesMonth(){
+export async function getMovesMonth() {
     try {
 
         const today = getActualDate();
 
-        const { data } = await axios.get(`${URL_API}movimientos/mensual/${(today.numberDate.month)+1}/${today.numberDate.year}`);
+        const { data } = await axios.get(`${URL_API}movimientos/mensual/${(today.numberDate.month) + 1}/${today.numberDate.year}`);
 
-        if(data.status!==200){
+        if (data.status !== 200) {
             return;
         }
         return data.moves;
@@ -566,13 +566,13 @@ export async function getMovesMonth(){
  * 
  * @returns {object[]} List of users
  */
-export async function GetUsers(){
+export async function GetUsers() {
     try {
         const { data } = await axios.get(`${URL_API}usuarios/`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.users
-        }else{
+        } else {
             return [];
         }
 
@@ -588,12 +588,12 @@ export async function GetUsers(){
  * @param {number|string} idTicket - Id of the ticket
  * @returns {object} Information of the ticket
  */
-export async function GetTicket(idTicket){
+export async function GetTicket(idTicket) {
     try {
-        
+
         const { data } = await axios.get(`${URL_API}ticket/${idTicket}`);
 
-        if(data.status===200){
+        if (data.status === 200) {
             return data.ticket;
         }
 

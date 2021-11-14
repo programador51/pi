@@ -2,6 +2,16 @@ import styled from 'styled-components';
 
 export const ContainerTicket = styled.form`
 
+    .listStatus{
+        label , input {
+            cursor:pointer;
+        }
+
+        label{
+            padding:13px;
+        }
+    }
+
     background:url('https://res.cloudinary.com/dmtvwe2ur/image/upload/v1621226311/bg-ste_odr5gk.png') no-repeat left;
     background-size: 25%;
     .phoneCustomer , .customerName{
@@ -97,6 +107,7 @@ export const ContainerTicket = styled.form`
 
     .equip{
         grid-area: equip;
+        overflow: auto;
         .header{
             border-bottom: 1px solid #000;
             margin: 0 20px;

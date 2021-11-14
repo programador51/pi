@@ -1,4 +1,4 @@
-import React,{useContext} from "react";
+import React, { useContext } from "react";
 import "./CardRefaction.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,11 +17,13 @@ export default function CardRefaction({ refactions }) {
   const fetchedRefactions = refactions;
 
   const triggerUpdate = async (idRefaction) => {
+    console.log(idRefaction);
+
     const refactionRequested = fetchedRefactions.find(
       (refaction) => refaction.pedido == idRefaction
     );
 
-    if(refactionRequested.surtido===1)return;
+    if (refactionRequested.surtido === 1) return;
 
     const result = await updateDispatch(
       `Despachar ${refactionRequested.marca} ${refactionRequested.modelo} - ${refactionRequested.cantidad} pzs?`,
@@ -29,7 +31,6 @@ export default function CardRefaction({ refactions }) {
     );
 
     setReload(!reload);
-   
   };
 
   return (
@@ -61,17 +62,14 @@ export default function CardRefaction({ refactions }) {
               <p>{refaction.refaccion}</p>
             </div>
 
-            <div
-              id={refaction.pedido}
-              className="right"
-              onClick={(e) => {
-                triggerUpdate(e.target.parentNode.parentNode.id);
-                /* updateDispatch()
-                alert(e.target.parentNode.parentNode.id)
-                } */
-              }}
-            >
-              {refaction.surtido === 0 ? pending : ready}
+            <div id={refaction.pedido} className="right">
+              <div
+                onClick={(e) => {
+                  triggerUpdate(refaction.pedido);
+                }}
+              >
+                {refaction.surtido === 0 ? pending : ready}
+              </div>
             </div>
           </div>
         );

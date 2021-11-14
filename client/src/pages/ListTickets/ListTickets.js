@@ -8,23 +8,28 @@ import ContainerTable from "./Styles";
 import { SelectUsers } from "../../molecules/Users/Users";
 import { Link } from "react-router-dom";
 import useListTickets from './useListTickets';
+import { getUser } from '../../helpers/auth'
 
 export default function ListTickets() {
   let Tickets;
 
-  const {FetchTickets} = useListTickets();
+  const { FetchTickets } = useListTickets();
+
+  const { rol, id: userId } = getUser();
+
+  const [filterUser, setFilterUser] = useState(userId);
 
   const [row, setRow] = useState(null);
 
   useEffect(() => {
     (async function () {
-      const apiTickets = await GetTickets(1, "DESC", "na", "&idTecnico=3");
+      const apiTickets = await GetTickets(1, "DESC", "na", `&idTecnico=${filterUser}`);
 
       configTicketsTable.pages = apiTickets.pages;
       configTicketsTable.actualPage = apiTickets.actualPage;
       configTicketsTable.rows = apiTickets.tickets;
-      configTicketsTable.paginationFn = async(page,order,columnOrdering,aditionalQuery) => {
-        const data = await FetchTickets(page,order,columnOrdering,aditionalQuery);
+      configTicketsTable.paginationFn = async (page, order, columnOrdering, aditionalQuery) => {
+        const data = await FetchTickets(page, order, columnOrdering, filterUser);
         setRow(null);
         return data;
       }
@@ -38,16 +43,16 @@ export default function ListTickets() {
       Tickets.printTable();
       Tickets.printPagination();
     })();
-  }, []);
+  }, [filterUser]);
 
   return (
     <>
-      <Menu 
-        linkRefactions = '../refacciones'
-        linkInventory = '../inventario'
-        linkAddTickets = '../tickets'
-        linkTickets = '../tickets/ver'
-        linkManage = '../gestion'
+      <Menu
+        linkRefactions='../refacciones'
+        linkInventory='../inventario'
+        linkAddTickets='../tickets'
+        linkTickets='../tickets/ver'
+        linkManage='../gestion'
       />
 
       <ContainerTable>
@@ -55,13 +60,20 @@ export default function ListTickets() {
           <h2>Tickets</h2>
         </header>
 
-        <div className="filter">
-          <SelectUsers defValue={3} />
-        </div>
+        {rol === 3 ? <div className="filter">
+          <>
+
+            <SelectUsers
+              defValue={userId}
+              onChange={userId => setFilterUser(userId)}
+            />
+          </>
+        </div> : null}
+
 
         <div className="customTable">
           <div className="containerTable">
-          <table id="tickets"></table>
+            <table id="tickets"></table>
           </div>
           <div id="pagination-tickets" className="default-pagination"></div>
         </div>
@@ -69,9 +81,9 @@ export default function ListTickets() {
         {row !== null ? (
           <div className="edit">
             <Link to={`./ver/${row.id}`}>
-                <button className=" px-4 customBtn">
-                  {row.reparation.id===2 ? 'Ver' : 'Ver/Editar'}
-                </button>
+              <button className=" px-4 customBtn">
+                {row.reparation.id === 2 ? 'Ver' : 'Ver/Editar'}
+              </button>
             </Link>
           </div>
         ) : null}

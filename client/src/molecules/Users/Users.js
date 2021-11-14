@@ -12,12 +12,13 @@ import { GetUsers } from '../../helpers/apis';
  * @returns {JSX.Element} Select of users
  */
 export function SelectUsers({
-    forwardRef = () => {},
+    forwardRef = () => { },
     name = 'idUser',
     id = 'idUser',
     errors = {},
     defValue = null,
-    disabled = false
+    disabled = false,
+    onChange = () => { }
 }) {
 
     const [users, setUsers] = useState([]);
@@ -45,17 +46,17 @@ export function SelectUsers({
         <>
             {users.length > 0 ?
                 <Selection
-                    forwardRef = {forwardRef}
+                    forwardRef={forwardRef}
                     options={users}
                     value='id'
-                    name = {name}
-                    id = {id}
+                    name={name}
+                    id={id}
                     label='fullName'
-                    defaultValue = {defValue}
-                    errors = {errors}
-                    placeholder = {false}
-                    disabled = {disabled}
-                    
+                    defaultValue={defValue}
+                    errors={errors}
+                    placeholder={false}
+                    disabled={disabled}
+                    onChange={value => onChange(+value)}
                 />
                 : null}
         </>

@@ -2,6 +2,52 @@ const db = require('../config');
 
 class Inventory {
 
+    async GetPdfReport(request, response) {
+        const { typeReport } = request.params;
+
+        if (`${typeReport}` === 'diario') {
+            db.query(`CALL sp_GetDailyReportPdf()`, (e, res, cols) => {
+
+                if (e) {
+                    console.log(e);
+
+                    return response.status(200).json({
+                        status: 500,
+                        res: null
+                    });
+                }
+
+                console.log(res);
+
+                return response.status(200).json({
+                    total: res[0][0],
+                    incomings: res[1],
+                    expenses: res[2],
+                    tickets: res[3]
+                });
+            })
+        } else {
+            db.query(`CALL sp_GetMontlyReportPdf();`, (e, res, cols) => {
+                if (e) {
+                    console.log(e);
+
+                    return response.status(200).json({
+                        status: 500
+                    });
+                }
+
+                console.log(res);
+
+                return response.status(200).json({
+                    total: res[0][0],
+                    incomings: res[1],
+                    expenses: res[2],
+                    tickets: res[3]
+                });
+            });
+        }
+    }
+
     async RequestInventory(request, response) {
         console.log(request.body);
 
@@ -23,7 +69,7 @@ class Inventory {
                 if (error) {
                     return response.status(200).json({
                         status: 500,
-                        message:'Intenta solicitar la mercancia nuevamente',
+                        message: 'Intenta solicitar la mercancia nuevamente',
                         error
                     });
                 }
@@ -33,7 +79,7 @@ class Inventory {
                     message: 'Mercancia solicitada'
                 });
             })
-        ;
+            ;
     }
 
     async AvailableInventory(request, response) {

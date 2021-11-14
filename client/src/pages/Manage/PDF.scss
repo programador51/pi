@@ -1,0 +1,91 @@
+.a4 {
+  font-family: Arial, Helvetica, sans-serif;
+
+  .expense {
+    color: red;
+  }
+
+  .incoming {
+    color: green;
+  }
+
+  //   border: 2px solid red;
+  width: 21cm;
+  height: 29.2cm;
+  padding: 0.5cm;
+  box-sizing: border-box;
+
+  .logo {
+    height: 3cm;
+  }
+
+  header {
+    border-bottom: 3px solid #182e46;
+
+    color: #182e46;
+    font-weight: bold;
+
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 50% 50%;
+    gap: 15px;
+    grid-template-areas: "logo adress";
+
+    .logoContainer {
+      grid-area: logo;
+      display: flex;
+      justify-content: end;
+    }
+
+    .adress {
+      grid-area: adress;
+    }
+  }
+
+  .sellElement {
+    border: 3px solid #182e46;
+    border-style: none none solid none;
+
+    padding: 0 0 10px 0;
+    margin: 15px 0;
+    * {
+      margin: 0;
+    }
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-areas:
+      "header header header header"
+      "info info info info";
+
+    .header {
+      grid-area: header;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid black;
+      font-weight: bold;
+    }
+
+    .details {
+      grid-area: info;
+      display: grid;
+      grid-template-columns: repeat(4, 25%);
+      justify-content: center;
+      text-align: left;
+      p {
+        padding: 2px;
+        border: 1px solid black;
+        border-style: none solid solid solid;
+      }
+      :nth-child(1),
+      :nth-child(2),
+      :nth-child(3),
+      :nth-child(4) {
+        font-weight: bold;
+        text-align: center;
+        border: 1px solid black;
+        border-style: none solid solid solid;
+      }
+    }
+  }
+}

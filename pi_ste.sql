@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 25-10-2021 a las 00:38:52
+-- Tiempo de generación: 14-11-2021 a las 22:02:33
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -66,6 +66,8 @@ INSERT INTO movimientos (nombre,tipo,precio,idCorte,diaMovimiento,mesMovimiento,
 VALUES
 
 (@description,0,@amount,0,DAY(@actualDay),MONTH(@actualDay),YEAR(@actualDay));
+
+SELECT LAST_INSERT_ID();
 
 END$$
 
@@ -206,6 +208,68 @@ SET @currentAmounth = (SELECT
         
 END$$
 
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDailyReportPdf` ()  BEGIN
+
+SET lc_time_names = 'es_ES';
+
+SET @today = (SELECT NOW());
+
+SET @actualDay = (SELECT DAYOFMONTH(@today));
+SET @actualMonth = (SELECT MONTH(@today));
+SET @actualYear = (SELECT YEAR(@today));
+
+CALL sp_GetAverageTicket();
+
+SET @totalIncoming = (SELECT SUM(precio) FROM movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 0);
+
+SET @totalExpenses = (SELECT SUM(precio) FROM movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 1);
+
+/* Sumatory = Tickets with repaired status */
+
+SELECT
+	IFNULL(@totalIncoming,0) AS incoming,
+    IFNULL(@totalExpenses,0) AS expenses,
+    IFNULL(@averageTicket,0) AS averageTicket,
+    IFNULL(@sumatory,0) AS ticketPrice;
+    
+/* Select al the incoming list items */
+    
+SELECT 
+	nombre AS description,
+    precio AS price,
+    idMovimiento AS idMovement,
+    CONCAT(diaMovimiento,'-',MONTHNAME(CURDATE()),'-',yearMovimiento) AS date
+    
+    FROM Movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 0;
+    
+/* Select al the expenses list items */
+    
+SELECT 
+	nombre AS description,
+    precio AS price,
+    idMovimiento AS idMovement,
+    CONCAT(diaMovimiento,'-',MONTHNAME(CURDATE()),'-',yearMovimiento) AS date
+    
+    FROM Movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 1;
+    
+/* Select al the tickets with Repaired status */
+SELECT 
+	ticket.totalPago AS price,
+    CONCAT(ticket.modelo,' - ',ticket.marca) AS description,
+    ticket.idTicket AS idMovement,
+    CONCAT(diaRecoleccion,'-',MONTHNAME(CURDATE()),'-',recolectionYear) AS date
+    
+        FROM ticket
+
+        WHERE
+        
+        ticket.diaRecoleccion = @actualDay AND
+        ticket.mesRecoleccion = @actualMonth AND
+        ticket.recolectionYear = @actualYear AND 
+        ticket.estadoReparacion = 2;
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDayInventory` ()  BEGIN
 
     SET
@@ -226,7 +290,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetDaySuminister` ()  BEGIN
     
     CALL sp_GetSellDaysAverage();
     
-    SET @suministerDay = @inventoryValue/@averageSellsDay;   
+    SET @suministerDay = @inventoryValue/@averageSellsDay*365;   
     
     	SET @suministerDay = (IFNULL(@suministerDay,0));
    		
@@ -320,23 +384,114 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetManageStaticsV2` ()  BEGIN
             'noTickets',@noTickets
             ),
         	'suministerDay', JSON_OBJECT(
-            'average',@suministerDay,
-            'averageSells',@averageSellsDay,
+            'average',ROUND(@suministerDay,4),
+            'averageSells',ROUND(@averageSellsDay,4),
             'inventoryValue',@inventoryValue
             
             ),
             'suministerWeek',JSON_OBJECT(
-            'average',@suministerWeek,
-            'averageSells',@averageSellsWeek,
+            'average',ROUND(@suministerDay/7,4),
+            'averageSells',ROUND(@averageSellsWeek,4),
             'inventoryValue',@inventoryValue
             ),
             'rotation',JSON_OBJECT(
-            'average',@rotationInventory
+            'average',ROUND(@rotationInventory,4)
             )
         ) AS result);
  
 /* CREATE THE ROOT OF THE JSON */
      SELECT @result AS result;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetMontlyReportPdf` ()  BEGIN
+
+SET lc_time_names = 'es_ES';
+
+/*
+
+            https://www.tutorialspoint.com/How-to-get-the-first-day-of-the-current-month-in-MySQL
+            
+            */
+SET
+    @actualDay =(
+SELECT
+    NOW());
+SET
+    @actualMonth = MONTH(@actualDay);
+SET
+    @lastDay = DAY(LAST_DAY(@actualDay));
+SET
+    @actualYear = YEAR(@actualDay);
+    
+SET @ticketMontly = (SELECT
+    SUM(ticket.totalPago)
+FROM
+    ticket
+WHERE
+    ticket.mesRecoleccion = @actualMonth AND ticket.recolectionYear = @actualYear AND ticket.estadoReparacion = 2);
+    
+SET
+    @firstDay =(
+    SELECT
+        DAY(
+            DATE_SUB(
+                LAST_DAY(NOW()),
+                INTERVAL DAY(LAST_DAY(NOW())) - 1 DAY))
+            );
+        SET
+            @totalIncoming =(
+            SELECT
+                SUM(precio)
+            FROM
+                movimientos
+            WHERE
+                mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 0
+        );
+    SET
+        @totalExpenses =(
+        SELECT
+            SUM(precio)
+        FROM
+            movimientos
+        WHERE
+            mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 1
+    );
+CALL
+    sp_GetWeekSuminister();
+SELECT
+   IFNULL(@totalIncoming,0)  AS incoming, IFNULL(@totalExpenses,0) AS expenses, IFNULL(@suministerWeek,0) AS suministerWeek,
+   @ticketMontly AS ticketPrice;
+    /* Select al the incoming list items */
+SELECT
+    nombre AS description, precio AS price, idMovimiento AS idMovement,
+    CONCAT(diaMovimiento,'-',MONTHNAME(CURDATE()),'-',yearMovimiento) AS date
+FROM
+    Movimientos
+WHERE
+    mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 0;
+    /* Select al the expenses list items */
+SELECT
+    nombre AS description, precio AS price, idMovimiento AS idMovement,
+    CONCAT(diaMovimiento,'-',MONTHNAME(CURDATE()),'-',yearMovimiento) AS date
+FROM
+    Movimientos
+WHERE
+    mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND tipo = 1;
+    /* Select al the tickets with Repaired status */
+SELECT
+    ticket.totalPago AS price, CONCAT(
+        ticket.modelo,
+        ' - ',
+        ticket.marca
+    ) AS description,
+    ticket.idTicket AS idMovement,
+    CONCAT(diaRecoleccion,'-',MONTHNAME(CURDATE()),'-',recolectionYear) AS date
+FROM
+    ticket
+WHERE
+    ticket.mesRecoleccion = @actualMonth AND ticket.recolectionYear = @actualYear AND ticket.estadoReparacion = 2;
+
 
 END$$
 
@@ -374,7 +529,7 @@ SET @actualDay = (SELECT DAYOFMONTH(@today));
 SET @actualMonth = (SELECT MONTH(@today));
 SET @actualYear = (SELECT YEAR(@today));
 
-SET @averageSellsDay = (SELECT SUM(precio) FROM movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear AND nombre LIKE '%accesorios%');
+SET @averageSellsDay = (SELECT SUM(precio) FROM movimientos WHERE diaMovimiento = @actualDay AND mesMovimiento = @actualMonth AND yearMovimiento = @actualYear );
 
 SET @averageSellsDay = @averageSellsDay * 10;
 
@@ -415,8 +570,7 @@ WHERE
     mesMovimiento >= @actualMonthStart AND
     mesMovimiento <= @actualMonthEnd AND
     yearMovimiento >= @actualYearStart AND
-    yearMovimiento <= @actualYearEnd AND
-    nombre LIKE '%accesorios%'
+    yearMovimiento <= @actualYearEnd
     ));
     
     SET @averageSellsWeek = @averageSellsWeek * 55;
@@ -445,6 +599,13 @@ SELECT
     ticket.totalPago AS amount
     
 FROM ticket WHERE ticket.idTicket = apiIdTicket;
+
+SELECT 
+	idTicketsEstado AS idValue,
+    idEstadoTicketNombre AS idStatus,
+    estado AS value
+    
+FROM ticketestados WHERE ticketCorresponde = apiIdTicket;
 
 END$$
 
@@ -539,7 +700,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetWeekSuminister` ()  BEGIN
     
     CALL sp_GetSellWeekAverage();
     
-    SET @suministerWeek = @inventoryValue/@averageSellsWeek; 
+    SET @suministerWeek = @SellDaysAverage/7; 
     
 	SET @suministerWeek = (IFNULL(@suministerWeek,0));
     
@@ -570,7 +731,8 @@ INSERT INTO `categoria` (`idCategoria`, `nombre`) VALUES
 (3, 'Pantallas'),
 (4, 'Baterias'),
 (5, 'Videojuegos'),
-(6, 'Software');
+(6, 'Software'),
+(7, 'Accesorios');
 
 -- --------------------------------------------------------
 
@@ -652,7 +814,10 @@ INSERT INTO `dinero` (`idEstadoCaja`, `montoInicial`, `montoFinal`, `dia`, `mes`
 (16, 350.01, 0, 10, 10, 2021),
 (17, 350.01, 0, 21, 10, 2021),
 (18, 350.01, 0, 22, 10, 2021),
-(19, 350.01, 0, 24, 10, 2021);
+(19, 350.01, 0, 24, 10, 2021),
+(20, 350.01, 0, 7, 11, 2021),
+(21, 350.01, 0, 13, 11, 2021),
+(22, 350.01, 0, 14, 11, 2021);
 
 -- --------------------------------------------------------
 
@@ -743,9 +908,12 @@ CREATE TABLE `inventario` (
 --
 
 INSERT INTO `inventario` (`codigo`, `nombre`, `descripcion`, `stock`, `categoria`, `precioCompra`, `precioVenta`) VALUES
-(18, '', 'Office 365', 0, 6, 800, 1000),
-(19, '', 'Azure blob', 3, 6, 199.99, 249.99),
-(20, '', 'App service', 9, 6, 149.99, 199.99);
+(21, '', 'Pantalla iPhone 7 Blanca', 7, 3, 20, 150),
+(22, '', 'Pantalla iPhone 6 Blanca', 7, 3, 20, 120),
+(23, '', 'Accesorio A20', 0, 7, 20, 120),
+(24, '', 'Pantalla iPhone 6 Negra', 10, 3, 20, 120),
+(25, '', 'Pantalla iPhone 8 Negra', 20, 3, 20, 150),
+(26, '', 'Pantalla iPhone 8 Blanca', 10, 3, 20, 1100);
 
 -- --------------------------------------------------------
 
@@ -785,7 +953,36 @@ INSERT INTO `movimientos` (`idMovimiento`, `nombre`, `tipo`, `precio`, `idCorte`
 (25, 'dasdas - dadas', 0, 12, 0, 24, 10, 2021),
 (26, 'Nokia - Lumia', 0, 200, 0, 24, 10, 2021),
 (27, 'Xiaomi - Galaxy', 0, 499, 0, 24, 10, 2021),
-(28, 'Xiaomi - Galaxy', 0, 300, 0, 24, 10, 2021);
+(28, 'Xiaomi - Galaxy', 0, 300, 0, 24, 10, 2021),
+(29, 'Samsung - A50', 0, 450, 0, 7, 11, 2021),
+(30, 'iphone - iphone 6', 0, 800, 0, 7, 11, 2021),
+(31, 'dasdas - dasdsa', 0, 123, 0, 13, 11, 2021),
+(32, 'Perro', 0, 1000, 0, 13, 11, 2021),
+(33, 'Luz', 1, 500, 0, 14, 11, 2021),
+(34, 'Agua', 1, 150, 0, 14, 11, 2021),
+(35, 'Chamba del inge', 1, 600, 0, 14, 11, 2021),
+(36, 'Pantalla del inge', 1, 1000, 0, 14, 11, 2021),
+(37, 'Pantalla del inge', 0, 2000, 0, 14, 11, 2021),
+(38, 'Apple - Iphone 10', 0, 599, 0, 14, 11, 2021),
+(39, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(40, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(41, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(42, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(43, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(44, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(45, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(46, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(47, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(48, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(49, 'Patito - Chafa', 0, 1299, 0, 14, 11, 2021),
+(50, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(51, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(52, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(53, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(54, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(55, 'Xiaomi - Redmi', 0, 20, 0, 14, 11, 2021),
+(56, 'asdasdasdas - dasdas', 0, 23123100, 0, 14, 11, 2021),
+(57, 'dasdas - dadasdas', 0, 123, 0, 14, 11, 2021);
 
 -- --------------------------------------------------------
 
@@ -820,7 +1017,9 @@ INSERT INTO `pedidos` (`pedido`, `cantidad`, `refaccion`, `marca`, `modelo`, `co
 (16, 1, 'Camara trasera', 'Nokia', 'Lumia', 0, NULL, 18, 5, 2021, 0, 1),
 (17, 1, 'Samsumg', 'Samsumg', 'Galaxy', 0, NULL, 2, 10, 2021, 1, 1),
 (18, 1, 'Xiaomi', 'Xiaomi', 'Xiaomi', 0, NULL, 2, 10, 2021, 0, 1),
-(19, 2, 'Pantalla generica', 'Xiaomi', 'Mi2Lite', 0, NULL, 3, 10, 2021, 0, 1);
+(19, 2, 'Pantalla generica', 'Xiaomi', 'Mi2Lite', 0, NULL, 3, 10, 2021, 0, 1),
+(20, 1, 'Pollo ', 'Loco', '1KG', 0, NULL, 14, 11, 2021, 1, 1),
+(21, 2, 'Galletas', 'Danesas', 'Danesas', 0, NULL, 14, 11, 2021, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -888,7 +1087,16 @@ INSERT INTO `rotation` (`id`, `tecnico`, `cantidad`, `precioCompra`, `total`, `f
 (25, 4, 4, '200.00', '800.00', '2021-10-09 00:00:00'),
 (26, 4, 1, '200.00', '200.00', '2021-10-09 00:00:00'),
 (27, 4, 1, '200.00', '200.00', '2021-10-09 00:00:00'),
-(28, 4, 1, '150.00', '150.00', '2021-10-10 00:00:00');
+(28, 4, 1, '150.00', '150.00', '2021-10-10 00:00:00'),
+(29, 5, 2, '20.00', '40.00', '2021-11-07 00:00:00'),
+(30, 4, 5, '20.00', '100.00', '2021-11-07 00:00:00'),
+(31, 4, 2, '20.00', '40.00', '2021-11-07 00:00:00'),
+(32, 5, 90, '20.00', '1800.00', '2021-11-07 00:00:00'),
+(33, 5, 1, '20.00', '20.00', '2021-11-07 00:00:00'),
+(34, 3, 1, '20.00', '20.00', '2021-11-13 00:00:00'),
+(35, 3, 2, '20.00', '40.00', '2021-11-13 00:00:00'),
+(36, 3, 1, '20.00', '20.00', '2021-11-13 00:00:00'),
+(37, 3, 2, '20.00', '40.00', '2021-11-13 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -989,7 +1197,37 @@ INSERT INTO `ticket` (`idTicket`, `diaRecoleccion`, `mesRecoleccion`, `recolecti
 (118, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
 (119, 3, 10, 2021, 13, 10, 2021, 'Test', 'Test', 'Test', '2', 123, NULL, 2, 123, 3, 1, NULL, 'Test  Test Test', 123123123123312),
 (120, 24, 10, 2021, 28, 10, 2021, 'Galaxy', 'Xiaomi', '', '4', 399, NULL, 1, 499, 3, 2, NULL, 'Mario  Bros Perez', 45148488484),
-(121, 24, 10, 2021, 24, 10, 2021, 'Galaxy', 'Xiaomi', '', '4', 250, NULL, 1, 300, 3, 2, NULL, 'Luigi  Bros Perez', 51548484949);
+(121, 24, 10, 2021, 24, 10, 2021, 'Galaxy', 'Xiaomi', '', '4', 250, NULL, 1, 300, 3, 2, NULL, 'Luigi  Bros Perez', 51548484949),
+(122, 7, 11, 2021, 7, 11, 2021, 'A50', 'Samsung', '', '5', 450, NULL, 1, 450, 5, 2, NULL, 'Luis Roberto Jaramillo Mtz', 8456541584),
+(123, 7, 11, 2021, 7, 11, 2021, 'iphone 6', 'iphone', '', '1', 800, NULL, 1, 800, 5, 2, NULL, 'Luis Jaramillo Martinez Martinez', 8455644561),
+(124, 13, 11, 2021, 15, 11, 2021, 'dasdsa', 'dasdas', 'dasdasdasdas', '2', 123, NULL, 1, 123, 4, 2, NULL, 'fdgdf gdfgdf fdgdfg gdfg', 312312312312),
+(125, 13, 11, 2021, 15, 11, 2021, 'adasdas', 'asdda', 'adasdasdas', '2', 123, NULL, 2, 123, 4, 3, NULL, 'Maria 32123 ew Martinez', 123123121312),
+(126, 14, 11, 2021, 15, 11, 2021, 'Iphone 10', 'Apple', '', '2', 599, NULL, 1, 599, 3, 2, NULL, 'Mario Santos Coy Perez', 123456789123),
+(127, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(128, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(129, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(130, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(131, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(132, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(133, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(134, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(135, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(136, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(137, 14, 11, 2021, 20, 11, 2021, 'Chafa', 'Patito', '', '2', 999, NULL, 1, 1299, 5, 2, NULL, 'Jesus Fernando Montalvo Garcia', 123456789789),
+(138, 14, 11, 2021, 18, 11, 2021, 'asdasdas', 'sdasdas', '', '5', 123, NULL, 1, 123, 3, 3, NULL, 'aaa aaaa aa aaa', 1231231231231),
+(139, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(140, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(141, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(142, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(143, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(144, 14, 11, 2021, 18, 11, 2021, 'Redmi', 'Xiaomi', '', '5', 12, NULL, 1, 20, 3, 2, NULL, 'Maria Jose Santos Olivares', 123456789144),
+(145, 14, 11, 2021, 18, 11, 2021, 'dasdasdasdasd', 'asdasdasdas', '', '4', 12312, NULL, 2, 23123100, 3, 2, NULL, 'adasdasdasdas dasdasdasdasd asdasdasdasdas dasdasd', 3123123123123121),
+(146, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 1, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123),
+(147, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 1, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123),
+(148, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 1, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123),
+(149, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 1, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123),
+(150, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 1, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123),
+(151, 14, 11, 2021, 16, 11, 2021, 'dadasdas', 'dasdas', '', '4', 123, NULL, 1, 123, 3, 2, NULL, 'Jose Juan Ramirez Zuniga', 123123123132123);
 
 -- --------------------------------------------------------
 
@@ -1009,22 +1247,34 @@ CREATE TABLE `ticketestados` (
 --
 
 INSERT INTO `ticketestados` (`idTicketsEstado`, `idEstadoTicketNombre`, `ticketCorresponde`, `estado`) VALUES
-(13, 1, 38, 1),
-(14, 2, 38, 1),
-(15, 3, 38, 0),
-(16, 4, 38, 1),
-(17, 1, 39, 0),
-(18, 2, 39, 1),
-(19, 3, 39, 1),
-(20, 4, 39, 1),
-(21, 1, 40, 0),
-(22, 2, 40, 1),
-(23, 3, 40, 1),
-(24, 4, 40, 1),
-(25, 1, 41, 1),
-(26, 2, 41, 0),
-(27, 3, 41, 0),
-(28, 4, 41, 0);
+(40, 1, 49, 1),
+(41, 2, 49, 1),
+(42, 3, 49, 0),
+(43, 4, 49, 0),
+(44, 1, 143, 0),
+(45, 2, 143, 1),
+(46, 3, 143, 1),
+(47, 4, 143, 1),
+(48, 1, 144, 0),
+(49, 2, 144, 1),
+(50, 3, 144, 1),
+(51, 4, 144, 1),
+(52, 1, 145, 1),
+(53, 2, 145, 1),
+(54, 3, 145, 0),
+(55, 4, 145, 0),
+(56, 1, 149, 0),
+(57, 2, 149, 0),
+(58, 3, 149, 1),
+(59, 4, 149, 1),
+(60, 1, 150, 0),
+(61, 2, 150, 0),
+(62, 3, 150, 1),
+(63, 4, 150, 1),
+(64, 1, 151, 0),
+(65, 2, 151, 0),
+(66, 3, 151, 1),
+(67, 4, 151, 1);
 
 -- --------------------------------------------------------
 
@@ -1049,7 +1299,7 @@ CREATE TABLE `usuario` (
 --
 
 INSERT INTO `usuario` (`id`, `username`, `password`, `rol`, `sucursal`, `nombre`, `nombre2`, `paterno`, `materno`) VALUES
-(3, 'prog51', '$2b$10$337buhKls4t87PRgiPi6seL3YRwfdELTiDC7xtFFuhTh1gMROBf3O', 1, 1, 'Jose', 'Luis', 'Perez', 'Olguin'),
+(3, 'prog51', '$2b$10$337buhKls4t87PRgiPi6seL3YRwfdELTiDC7xtFFuhTh1gMROBf3O', 3, 1, 'Jose', 'Luis', 'Perez', 'Olguin'),
 (4, 'JLPO1', '$2b$10$W9rc7kxqkMRLL4.2nMgeOuvVP9adgf4rcV8h2mCnzVM3qkuTMM/zS', 3, 1, 'Adrian', NULL, 'Alardin', 'Iracheta'),
 (5, 'JLPO2', '$2b$10$UsxltFKWhGMHBm.y2TWx6OYeUxWaWhWBH6.NdFwI0ZsZDFCLxhYqy', 3, 1, 'Luis', '', 'Jaramillo', 'Nose');
 
@@ -1180,7 +1430,7 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `categoria`
 --
 ALTER TABLE `categoria`
-  MODIFY `idCategoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `idCategoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `clientes`
@@ -1198,7 +1448,7 @@ ALTER TABLE `contacto`
 -- AUTO_INCREMENT de la tabla `dinero`
 --
 ALTER TABLE `dinero`
-  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `idEstadoCaja` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
@@ -1228,19 +1478,19 @@ ALTER TABLE `gestion`
 -- AUTO_INCREMENT de la tabla `inventario`
 --
 ALTER TABLE `inventario`
-  MODIFY `codigo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `codigo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
-  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `idMovimiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `reparacion_estatus`
@@ -1258,7 +1508,7 @@ ALTER TABLE `rols`
 -- AUTO_INCREMENT de la tabla `rotation`
 --
 ALTER TABLE `rotation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT de la tabla `servicios`
@@ -1276,13 +1526,13 @@ ALTER TABLE `sucursales`
 -- AUTO_INCREMENT de la tabla `ticket`
 --
 ALTER TABLE `ticket`
-  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
+  MODIFY `idTicket` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
 
 --
 -- AUTO_INCREMENT de la tabla `ticketestados`
 --
 ALTER TABLE `ticketestados`
-  MODIFY `idTicketsEstado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `idTicketsEstado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`

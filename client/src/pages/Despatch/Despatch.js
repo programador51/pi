@@ -10,14 +10,16 @@ export default function Despatch() {
   const [refactions, setRefactions] = useState({});
   const [office, setOffice] = useState(1);
   const [isFetching, setIsFetching] = useState(true);
-  const { reload,setReload } = useContext(UtilitiesContext);
+  const { reload, setReload } = useContext(UtilitiesContext);
 
-  const reloadIcon = <FontAwesomeIcon icon={faRedoAlt} size="1x"/>
+  const reloadIcon = <FontAwesomeIcon icon={faRedoAlt} size="1x" />
 
   useEffect(() => {
     const initialLoad = async () => {
       setIsFetching(true);
       const fetchedRefactions = await refactionsOffice(office);
+
+      console.log(fetchedRefactions);
 
       if (!fetchedRefactions) return;
 
@@ -25,8 +27,8 @@ export default function Despatch() {
       setIsFetching(false);
     };
     validateRol();
-    initialLoad();  
-  }, [reload]);
+    initialLoad();
+  }, [office, reload]);
 
   const branches = [
     { value: 1, text: "San Nicolas" },
@@ -42,19 +44,18 @@ export default function Despatch() {
           Sucursal
         </label>
 
-        <select name="branch" className="w-60 mt-3" required>
+        <select
+          onChange={e => setOffice(parseInt(e.target.value, 10))}
+          name="branch" className="w-60 mt-3" required>
           {branches.map((branch) => {
-            return <option onClick={(e)=>{
-              setOffice(parseInt(e.target.value,10))
-              setReload(!reload);
-            }} value={branch.value}>{branch.text}</option>;
+            return <option value={branch.value}>{branch.text}</option>;
           })}
         </select>
       </div>
 
-      <p 
-        onClick={()=>setReload(!reload)}
-        className="reload"> 
+      <p
+        onClick={() => setReload(!reload)}
+        className="reload">
         {reloadIcon} Refrescar
       </p>
 

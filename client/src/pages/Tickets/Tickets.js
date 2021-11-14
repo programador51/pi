@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPhoneAlt, faIdCard } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
+import { getCheckValues } from '../../helpers/forms/checkbox';
 
 import { schema } from "./Validations";
 
@@ -37,12 +38,17 @@ export function Ticket() {
     resolver: yupResolver(schema),
     shouldFocusError: false,
     reValidateMode: "onSubmit",
-    defaultValues:{
-      receptionDate:new Date()
+    defaultValues: {
+      receptionDate: new Date()
     }
   });
 
   const addTicket = (data) => {
+    data = {
+      ...data,
+      status: getCheckValues('listStatus')
+    }
+
     saveOnDb(data);
   };
 
@@ -93,7 +99,7 @@ export function Ticket() {
 
           <div className="technician">
             <label htmlFor="">Tecnico a cargo</label>
-            <SelectUsers forwardRef={register} errors = {errors}/>
+            <SelectUsers forwardRef={register} errors={errors} />
           </div>
 
           <div className="phoneCustomer">
@@ -109,7 +115,7 @@ export function Ticket() {
 
           <div className="repatirStatus">
             <label htmlFor="">Estado de reparacion</label>
-            <RepairStatus 
+            <RepairStatus
               errors={errors}
               forwardRef={register}
             />
@@ -155,7 +161,7 @@ export function Ticket() {
 
               <div>
                 <label htmlFor="">Servicio</label>
-                <SelectServices forwardRef={register} errors = {errors}/>
+                <SelectServices forwardRef={register} errors={errors} />
               </div>
             </div>
 
@@ -171,22 +177,22 @@ export function Ticket() {
 
             <div className="status">
               <p>Estado del equipo</p>
-              <div className="listStatus">
+              <div id="listStatus" className="listStatus">
                 <div>
-                  <input type="checkbox" />
-                  <label htmlFor="">Apagado</label>
+                  <input value="1" id="off" name="off" type="checkbox" />
+                  <label htmlFor="off">Apagado</label>
                 </div>
                 <div>
-                  <input type="checkbox" />
-                  <label htmlFor="">Chip</label>
+                  <input value="2" id="chip" name="chip" type="checkbox" />
+                  <label htmlFor="chip">Chip</label>
                 </div>
                 <div>
-                  <input type="checkbox" />
-                  <label htmlFor="">Encendido</label>
+                  <input value="3" id="on" name="on" type="checkbox" />
+                  <label htmlFor="on">Encendido</label>
                 </div>
                 <div>
-                  <input type="checkbox" />
-                  <label htmlFor="">Sim</label>
+                  <input value="4" id="sim" name="sim" type="checkbox" />
+                  <label htmlFor="sim">Sim</label>
                 </div>
               </div>
             </div>
@@ -198,7 +204,7 @@ export function Ticket() {
             name="observations"
             id="observations"
             forwardRef={register}
-            placeholder = 'Comentarios/Observaciones'
+            placeholder='Comentarios/Observaciones'
           />
         </div>
 

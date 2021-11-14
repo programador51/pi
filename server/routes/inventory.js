@@ -14,6 +14,8 @@ router.get('/disponible',
     ModelInvetory.AvailableInventory
 );
 
+router.get('/reporte/:typeReport', ModelInvetory.GetPdfReport);
+
 router.get('/categorias',
     ModelInvetory.getCategorys
 );

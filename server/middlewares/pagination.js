@@ -7,9 +7,10 @@
  */
 function getPagination(request, response, next) {
 
-    const limitRegisters = 20;
+    const limitRegisters = 10;
 
-    const page = parseInt(request.query.pagina, limitRegisters);
+    const page = parseInt(request.query.pagina);
+
     const startIndex = (page - 1) * limitRegisters;
 
     request.params.actualPage = page;
@@ -22,7 +23,7 @@ function getPagination(request, response, next) {
 function calculatePages(request, response, next) {
     const numberPages = Math.ceil(request.params.pages / request.params.noRegisters);
     request.params.pages = numberPages;
-    console.log(`${numberPages} pages founded!`);
+    // console.log(request.params.rangeBegin, request.params.noRegisters);
     next();
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import Number from "../../atoms/Inputs/Number/Number";
 import Modal from "../../components/general/Modal/Modal";
 import { SelectUsers } from "../../molecules/Users/Users";
@@ -10,10 +10,16 @@ import * as yup from "yup";
 import DispatchInventory from "../../components/individual/Inputs/DispatchInventory";
 import { querySuccess } from "../../helpers/alerts";
 import { UpdateRequestItem } from "../../helpers/apis";
+import { getUser } from "../../helpers/auth";
+import UtilitiesContext from '../../context/View/ViewContext';
 
 export default function ModalRequest() {
-  const [item,setItem] = useState(null);
-  const [showSpinner,setShowSpinner] = useState(false);
+  const [item, setItem] = useState(null);
+  const [showSpinner, setShowSpinner] = useState(false);
+
+  const { id } = getUser();
+
+  const { reload, setReload } = useContext(UtilitiesContext);
 
   const schema = yup.object({
     idCode: yup
@@ -22,10 +28,6 @@ export default function ModalRequest() {
       .required("Ingresa el codigo del producto")
       .typeError("Selecciona un item"),
 
-    idTechnician: yup
-      .number()
-      .positive()
-      .required("Selecciona el tecnico que solicita"),
     quantity: yup
       .number()
       .positive()
@@ -45,21 +47,30 @@ export default function ModalRequest() {
     reValidateMode: "onSubmit"
   });
 
-  const validateForm = async(data) => {
-      data = {
-          ...data,
-          total:data.quantity*item.buyPrice,
-          price:item.buyPrice,
-          idItem:item.id
-      }
+  const validateForm = async (data) => {
 
-      const requested = await UpdateRequestItem(data);
-      
-      if(requested) querySuccess('Producto solicitado',()=>document.getElementById('closeModal').click());
+    setShowSpinner(true);
+
+    data = {
+      ...data,
+      total: data.quantity * item.buyPrice,
+      price: item.buyPrice,
+      idItem: item.id,
+      idTechnician: id,
+    }
+
+    const requested = await UpdateRequestItem(data);
+
+    setShowSpinner(false);
+
+    if (requested) {
+      setReload(!reload);
+      querySuccess('Producto solicitado', () => document.getElementById('closeModal').click());
+    }
   };
 
   const showErrors = errors => {
-      console.log(errors);
+    console.log(errors);
   }
 
   return (
@@ -68,14 +79,14 @@ export default function ModalRequest() {
         buttonText="Solicitar mercancia"
         close="Cancelar"
         title="Sacar producto de inventario"
-        submit = 'Guardar'
-        idForm = 'requestItem'
-        textSpinner = 'Cargando...'
-        showSpinner = {showSpinner}
+        submit='Guardar'
+        idForm='requestItem'
+        textSpinner='Cargando...'
+        showSpinner={showSpinner}
       >
         <ContainerRequestItem
-            id = 'requestItem'
-          onSubmit={handleSubmit(validateForm,showErrors)}
+          id='requestItem'
+          onSubmit={handleSubmit(validateForm, showErrors)}
         >
           <div>
             <div className="rowInput">
@@ -83,15 +94,10 @@ export default function ModalRequest() {
               <DispatchInventory
                 forwardRef={register}
                 onChange={(item) => {
-                    setItem(item)
+                  setItem(item)
                 }}
                 errors={errors}
               />
-            </div>
-
-            <div className="rowInput ">
-              <label htmlFor="idTechnician">Tecnico que solicita</label>
-              <SelectUsers id="idTechnician" name="idTechnician" forwardRef = {register}/>
             </div>
 
             {item !== null ? (

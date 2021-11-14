@@ -14,7 +14,8 @@ router.post('/agregar',
 );
 
 router.post('/crear',
-   ModelTickets.create 
+    ModelTickets.create,
+    ModelTickets.saveStatesTicket
 );
 
 router.get('/tickets',

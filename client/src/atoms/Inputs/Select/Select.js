@@ -1,4 +1,4 @@
-import React, { useEffect , useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /**
  * 
@@ -10,28 +10,29 @@ export default function Selection({
   value = null,
   label = null,
   name = null,
+  css = '',
   id = null,
   defaultValue = null,
   errors = {},
   placeholder = true,
   disabled = false,
   placeholderText = 'Selecciona',
-  forwardRef = () => {},
-  onChange = () => {}
+  forwardRef = () => { },
+  onChange = () => { }
 }) {
 
-  const [selectValue,setSelectValue] = useState(null);
+  const [selectValue, setSelectValue] = useState(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     const htmlElement = document.getElementById(`option${id}${defaultValue}`);
 
-    if(defaultValue===null || htmlElement===null) return;
+    if (defaultValue === null || htmlElement === null) return;
 
     htmlElement.selected = true;
 
     setSelectValue(defaultValue);
 
-  },[defaultValue,options]);
+  }, [defaultValue, options]);
 
   const updateValue = (value) => {
     setSelectValue(value);
@@ -41,29 +42,30 @@ export default function Selection({
   return (
     <>
       {(value !== null) & (label !== null) ? (
-          <>
-          <select 
-            disabled = {disabled}
+        <>
+          <select
+            className={css}
+            disabled={disabled}
             name={name}
-            id={id} 
-            {...forwardRef(name)} 
-            onChange = {(e)=>updateValue(e.target.value)}
+            id={id}
+            {...forwardRef(name)}
+            onChange={(e) => updateValue(e.target.value)}
           >
 
             {placeholder === true && defaultValue === null ? <>
-            
-              <option selected = {true} disabled = {true} value="">{placeholderText}</option>
+
+              <option selected={true} disabled={true} value="">{placeholderText}</option>
 
             </> : null}
 
             {options.map((option) => (
               <option
-                id = {`option${id}${option[value]}`} 
+                id={`option${id}${option[value]}`}
                 value={option[value]}>{option[label]}</option>
             ))}
           </select>
           <p className="text-danger">{errors[name]?.['message']}</p>
-          </>
+        </>
       ) : null}
     </>
   );
