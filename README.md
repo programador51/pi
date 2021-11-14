@@ -47,6 +47,18 @@ Debe dar como resultado la siguiente estructura de carpetas, `client` y `server`
 1. Abrir la carpeta `server` de este repositorio en la terminal del S.O.
 2. Ejectuar el comando `npm run server`
 
+**NOTA:** Si la terminal muestra un error por no poder conectarse a la DB.
+Adapatar las credenciales de conexion en este archivo acorde a tu configuracion de XAMPP `server\config.js | Linea 2-7`
+
+```javascript
+const connection = mysql.createConnection({
+    host:'localhost' // Dejarlo igual,
+    user:'root' // Dejarlo igual, pero cambiarlo si tienes un usuario diferente a root,
+    password:'jl1731168' // Dejar con comillas simples si no tienes contraseña o usar la tuya,
+    database:'pi_ste' // Nombre de la DB, se de llamar pi_ste o segun hallas nombrado
+});
+```
+
 <span id="client"></span>
 
 ## Iniciar el cliente
