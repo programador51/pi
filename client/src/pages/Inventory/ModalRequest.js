@@ -17,7 +17,7 @@ export default function ModalRequest() {
   const [item, setItem] = useState(null);
   const [showSpinner, setShowSpinner] = useState(false);
 
-  const { id } = getUser();
+  const { id, nombre, nombre2, paterno, materno } = getUser();
 
   const { reload, setReload } = useContext(UtilitiesContext);
 
@@ -57,6 +57,7 @@ export default function ModalRequest() {
       price: item.buyPrice,
       idItem: item.id,
       idTechnician: id,
+      fullName: `${nombre} ${nombre2} ${paterno} ${materno}`
     }
 
     const requested = await UpdateRequestItem(data);

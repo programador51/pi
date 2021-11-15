@@ -1,4 +1,5 @@
 const express = require('express');
+const { getPagination, calculatePages } = require('../middlewares/pagination');
 const router = express.Router();
 const ModelInvetory = require('../model/inventory');
 
@@ -34,6 +35,13 @@ router.post('/editar/producto',
 
 router.post('/solicitar',
     ModelInvetory.RequestInventory
+);
+
+router.get('/log-mercancia',
+    getPagination,
+    ModelInvetory.GetNoLogCommodity,
+    calculatePages,
+    ModelInvetory.GetLogs
 );
 
 module.exports = router;

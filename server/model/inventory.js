@@ -48,19 +48,60 @@ class Inventory {
         }
     }
 
+    async GetNoLogCommodity(request, response, next) {
+        db.query(`SELECT COUNT(*) AS noLogs FROM loginventory`, (e, res, fields) => {
+            if (e) {
+                return response.status(200).json({
+                    status: 500,
+                    e
+                });
+            } else {
+                console.log(res[0]['noLogs']);
+
+                request.params.pages = res[0]['noLogs'];
+                next();
+            }
+        })
+    }
+
+    async GetLogs(request, response) {
+        db.query(`CALL sp_GetLogManage(?,?)`, [request.params.rangeBegin,
+        request.params.noRegisters], (e, res, fields) => {
+            if (e) {
+                return response.status(200).json({
+                    status: 500,
+                    e
+                });
+            } else {
+
+                console.log(res)
+
+                return response.json({
+                    status: 200,
+                    data: {
+                        pages: +(request.params.pages),
+                        actualPage: +(request.query.pagina),
+                        commodity: res[0]
+                    }
+                });
+            }
+        });
+    }
+
     async RequestInventory(request, response) {
         console.log(request.body);
 
         db.query(`
         
-         CALL sp_AddRequestMovement(?,?,?,?,?);
+         CALL sp_AddRequestMovement(?,?,?,?,?,?);
 
         `, [
             request.body.idTechnician,
             request.body.quantity,
             request.body.price,
             request.body.total,
-            request.body.idItem
+            request.body.idItem,
+            request.body.fullName
         ],
             (error, result, columns) => {
 

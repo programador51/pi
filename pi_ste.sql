@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-11-2021 a las 22:02:33
+-- Tiempo de generación: 15-11-2021 a las 05:52:34
 -- Versión del servidor: 10.4.17-MariaDB
 -- Versión de PHP: 8.0.1
 
@@ -25,7 +25,7 @@ DELIMITER $$
 --
 -- Procedimientos
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddRequestMovement` (IN `apiTecnico` INT, IN `apiCantidad` INT, IN `apiPrecioCompra` INT, IN `apiTotal` INT, IN `apiIdItem` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddRequestMovement` (IN `apiTecnico` INT, IN `apiCantidad` INT, IN `apiPrecioCompra` INT, IN `apiTotal` INT, IN `apiIdItem` INT, IN `apiName` VARCHAR(40) CHARSET utf8)  BEGIN
 	
     SET @totalStock = (SELECT stock FROM inventario WHERE codigo = apiIdItem);
     
@@ -51,6 +51,26 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_AddRequestMovement` (IN `apiTecn
              apiTotal,
              @today
          );
+         
+         
+      INSERT INTO loginventory
+      (
+      	idUser,
+        fullName,
+        date,
+        idInventory,
+        quantity
+      )
+      
+      VALUES
+      
+      (
+         apiTecnico,
+          apiName,
+          @today,
+          apiIdItem,
+          apiCantidad
+      );
          
 END$$
 
@@ -341,6 +361,34 @@ END$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetLastCurrentAmount` ()  BEGIN
 
 SET @lastCurrenAmount = (SELECT montoInicial FROM dinero ORDER BY idEstadoCaja DESC LIMIT 1);
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_GetLogManage` (IN `begin` INT, IN `noRows` INT)  BEGIN
+
+SET
+        lc_time_names = 'es_ES';
+    SELECT
+        loginventory.fullName,
+        CONCAT(
+            DAYOFMONTH(loginventory.date),
+            '-',
+            MONTHNAME(loginventory.date),
+            '-',
+            YEAR(loginventory.date)
+        ) AS date,
+        loginventory.id,
+        loginventory.quantity,
+        loginventory.idInventory,
+        inventario.descripcion
+    FROM
+        loginventory
+        INNER JOIN inventario ON inventario.codigo = loginventory.idInventory
+
+    ORDER BY loginventory.date DESC , loginventory.id DESC
+
+    LIMIT
+        begin, noRows;
 
 END$$
 
@@ -908,12 +956,42 @@ CREATE TABLE `inventario` (
 --
 
 INSERT INTO `inventario` (`codigo`, `nombre`, `descripcion`, `stock`, `categoria`, `precioCompra`, `precioVenta`) VALUES
-(21, '', 'Pantalla iPhone 7 Blanca', 7, 3, 20, 150),
-(22, '', 'Pantalla iPhone 6 Blanca', 7, 3, 20, 120),
+(21, '', 'Pantalla iPhone 7 Blanca', 6, 3, 20, 150),
+(22, '', 'Pantalla iPhone 6 Blanca', 2, 3, 20, 120),
 (23, '', 'Accesorio A20', 0, 7, 20, 120),
-(24, '', 'Pantalla iPhone 6 Negra', 10, 3, 20, 120),
-(25, '', 'Pantalla iPhone 8 Negra', 20, 3, 20, 150),
-(26, '', 'Pantalla iPhone 8 Blanca', 10, 3, 20, 1100);
+(24, '', 'Pantalla iPhone 6 Negra', 0, 3, 20, 120),
+(25, '', 'Pantalla iPhone 8 Negra', 4, 3, 20, 150),
+(26, '', 'Pantalla iPhone 8 Blanca', 9, 3, 20, 1100);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `loginventory`
+--
+
+CREATE TABLE `loginventory` (
+  `id` int(11) NOT NULL,
+  `idUser` int(11) NOT NULL,
+  `fullName` varchar(40) NOT NULL,
+  `date` datetime NOT NULL DEFAULT current_timestamp(),
+  `idInventory` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `loginventory`
+--
+
+INSERT INTO `loginventory` (`id`, `idUser`, `fullName`, `date`, `idInventory`, `quantity`) VALUES
+(1, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 21, 1),
+(2, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 25, 10),
+(3, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 22, 2),
+(4, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 25, 3),
+(5, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 26, 1),
+(6, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 22, 1),
+(7, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 25, 3),
+(8, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 24, 10),
+(9, 3, 'Jose Luis Perez Olguin', '2021-11-14 00:00:00', 22, 2);
 
 -- --------------------------------------------------------
 
@@ -1096,7 +1174,16 @@ INSERT INTO `rotation` (`id`, `tecnico`, `cantidad`, `precioCompra`, `total`, `f
 (34, 3, 1, '20.00', '20.00', '2021-11-13 00:00:00'),
 (35, 3, 2, '20.00', '40.00', '2021-11-13 00:00:00'),
 (36, 3, 1, '20.00', '20.00', '2021-11-13 00:00:00'),
-(37, 3, 2, '20.00', '40.00', '2021-11-13 00:00:00');
+(37, 3, 2, '20.00', '40.00', '2021-11-13 00:00:00'),
+(38, 3, 1, '20.00', '20.00', '2021-11-14 00:00:00'),
+(39, 3, 10, '20.00', '200.00', '2021-11-14 00:00:00'),
+(40, 3, 2, '20.00', '40.00', '2021-11-14 00:00:00'),
+(41, 3, 3, '20.00', '60.00', '2021-11-14 00:00:00'),
+(42, 3, 1, '20.00', '20.00', '2021-11-14 00:00:00'),
+(43, 3, 1, '20.00', '20.00', '2021-11-14 00:00:00'),
+(44, 3, 3, '20.00', '60.00', '2021-11-14 00:00:00'),
+(45, 3, 10, '20.00', '200.00', '2021-11-14 00:00:00'),
+(46, 3, 2, '20.00', '40.00', '2021-11-14 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1363,6 +1450,12 @@ ALTER TABLE `inventario`
   ADD KEY `categoria` (`categoria`);
 
 --
+-- Indices de la tabla `loginventory`
+--
+ALTER TABLE `loginventory`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indices de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
@@ -1481,6 +1574,12 @@ ALTER TABLE `inventario`
   MODIFY `codigo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
+-- AUTO_INCREMENT de la tabla `loginventory`
+--
+ALTER TABLE `loginventory`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
@@ -1508,7 +1607,7 @@ ALTER TABLE `rols`
 -- AUTO_INCREMENT de la tabla `rotation`
 --
 ALTER TABLE `rotation`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT de la tabla `servicios`

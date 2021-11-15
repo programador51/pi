@@ -3,6 +3,25 @@ import { URL_API } from '../config';
 import { getActualDate } from '../helpers/dates';
 import { queryError, querySuccess } from '../helpers/alerts';
 
+export async function GetLogManage(page = 1, order = 'DESC', columnOrdering = 'na', aditionalQuery) {
+    try {
+
+        const { data } = await axios.get(`${URL_API}inventario/log-mercancia?pagina=${page}`);
+
+        return data.data;
+
+    } catch (error) {
+
+        console.log(error);
+
+        return {
+            data: [],
+            pages: 0,
+            actualPage: 0
+        }
+    }
+}
+
 /**
  * Update the requested items
  * @param {object} item - Information of the item requested
